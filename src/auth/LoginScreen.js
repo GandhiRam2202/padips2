@@ -37,29 +37,47 @@ export default function LoginScreen({ navigation }) {
       SUBMIT HANDLER
   ======================= */
   const submit = async (values) => {
+  if (loading) return;
+
   try {
     setLoading(true);
 
     const res = await api.post("/auth/login", values);
+  
 
-    if (!res.data?.token || !res.data?.user) {
-      Toast.show({ type: "error", text1: "Invalid login" });
-      return;
+    // ❌ Invalid response guard
+    if (!res?.data?.token || !res?.data?.user) {
+      Toast.show({
+        type: "error",
+        text1: "Invalid login response",
+      });
+      return; // ✅ IMPORTANT
     }
 
-    Toast.show({ type: "success", text1: "Login successful" });
+    // ✅ Success
+    Toast.show({
+      type: "success",
+      text1: "Login successful",
+    });
 
-    // 🔥 PASS BOTH TOKEN + USER
+    // 🔥 MUST pass BOTH
     await login(res.data.token, res.data.user);
+
   } catch (err) {
+    console.log("LOGIN ERROR:", err?.response || err);
+
     Toast.show({
       type: "error",
-      text1: err.response?.data?.message || "Login failed",
+      text1:
+        err?.response?.data?.message ||
+        err?.message ||
+        "Login failed",
     });
   } finally {
     setLoading(false);
   }
 };
+
 
 
 

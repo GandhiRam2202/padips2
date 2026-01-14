@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { getToken, getUser, saveToken, clearSession } from "../utils/storage";
+import { getToken, getUser, saveToken, clearSession, saveUser } from "../utils/storage";
 import { socket } from "../socket/socket";
 
 export const AuthContext = createContext();
@@ -28,34 +28,42 @@ export function AuthProvider({ children }) {
   }, []);
 
   /* FORCE LOGOUT */
-  useEffect(() => {
-    if (!token) return;
+useEffect(() => {
+  if (!token) return;
 
-    const handler = async (data) => {
-      await clearSession();
-      setToken(null);
-      setUser(null);
+  const handler = async (data) => {
+    await clearSession();
+    setToken(null);
+    setUser(null);
 
-      Alert.alert(
-        data.type === "blocked" ? "Account Blocked" : "Account Suspended",
-        data.reason || "Access revoked"
-      );
-    };
+    socket.disconnect();
 
-    socket.on("forceLogout", handler);
-    return () => socket.off("forceLogout", handler);
-  }, [token]);
-
-  const login = async (token, user) => {
-    await saveToken(token);
-    await saveUser(user);
-
-    setToken(token);
-    setUser(user);
-
-    socket.connect();
-    socket.emit("join", user._id); // ✅ THIS WAS MISSING
+    Alert.alert(
+      data.type === "blocked" ? "Account Blocked" : "Account Suspended",
+      data.reason || "Your access has been restricted"
+    );
   };
+
+  socket.on("forceLogout", handler);
+  return () => socket.off("forceLogout", handler);
+}, [token]);
+
+
+const login = async (token, user) => {
+  await saveToken(token);
+  await saveUser(user);
+
+  setToken(token);
+  setUser(user);
+
+  // 🔌 CONNECT + JOIN ROOM (MATCH BACKEND)
+  socket.connect();
+  socket.emit("join", {
+    userId: user._id,
+    role: user.role,
+  });
+};
+
 
   const logout = async () => {
     socket.disconnect();
