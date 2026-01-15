@@ -1,70 +1,75 @@
 import { createContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
-import { getToken, getUser, saveToken, clearSession, saveUser } from "../utils/storage";
+import { getToken, getUser, saveToken, saveUser, clearSession } from "../utils/storage";
 import { socket } from "../socket/socket";
 
 export const AuthContext = createContext();
+
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* LOAD SESSION */
+  /* =====================
+     LOAD SESSION ON START
+  ====================== */
   useEffect(() => {
     (async () => {
-      const t = await getToken();
-      const u = await getUser();
+      const storedToken = await getToken();
+      const storedUser = await getUser();
 
-      if (t && u) {
-        setToken(t);
-        setUser(u);
+      if (storedToken && storedUser) {
+        setToken(storedToken);
+        setUser(storedUser);
 
         socket.connect();
-        socket.emit("join", u._id); // ✅ CORRECT
+        socket.emit("join", storedUser._id); // ✅ MUST BE _id
       }
 
       setLoading(false);
     })();
   }, []);
 
-  /* FORCE LOGOUT */
-useEffect(() => {
-  if (!token) return;
+  /* =====================
+     🔥 FORCE LOGOUT (PUT HERE)
+  ====================== */
+  useEffect(() => {
+    if (!token) return;
 
-  const handler = async (data) => {
-    await clearSession();
-    setToken(null);
-    setUser(null);
+    const handler = async (data) => {
 
-    socket.disconnect();
+      await logout(); // ✅ THIS RUNS NOW
 
-    Alert.alert(
-      data.type === "blocked" ? "Account Blocked" : "Account Suspended",
-      data.reason || "Your access has been restricted"
-    );
+      Alert.alert(
+        data.type === "blocked" ? "Account Blocked" : "Account Suspended",
+        data.reason || "Your access has been restricted"
+      );
+    };
+
+    socket.on("forceLogout", handler);
+
+    return () => {
+      socket.off("forceLogout", handler);
+    };
+  }, [token]);
+
+  /* =====================
+     LOGIN
+  ====================== */
+  const login = async (newToken, userData) => {
+    await saveToken(newToken);
+    await saveUser(userData);
+
+    setToken(newToken);
+    setUser(userData);
+
+    socket.connect();
+    socket.emit("join", userData._id); // ✅ SAME ROOM ID
   };
 
-  socket.on("forceLogout", handler);
-  return () => socket.off("forceLogout", handler);
-}, [token]);
-
-
-const login = async (token, user) => {
-  await saveToken(token);
-  await saveUser(user);
-
-  setToken(token);
-  setUser(user);
-
-  // 🔌 CONNECT + JOIN ROOM (MATCH BACKEND)
-  socket.connect();
-  socket.emit("join", {
-    userId: user._id,
-    role: user.role,
-  });
-};
-
-
+  /* =====================
+     LOGOUT
+  ====================== */
   const logout = async () => {
     socket.disconnect();
     await clearSession();
@@ -73,9 +78,10 @@ const login = async (token, user) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{ token, user, login, logout, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
-

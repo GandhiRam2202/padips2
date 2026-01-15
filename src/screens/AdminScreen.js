@@ -10,12 +10,24 @@ import {
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import Toast from "react-native-toast-message";
+import { TextInput } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
+
 
 export default function AdminScreen() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
+  const [search, setSearch] = useState("");
+
+  const navigation = useNavigation();
+
+  const filteredUsers = users.filter((u) =>
+  u.email.toLowerCase().includes(search.toLowerCase())
+);
+
+
 
   /* =====================
      FETCH USERS
@@ -57,8 +69,6 @@ export default function AdminScreen() {
 
       let endpoint = "";
       if (type === "suspend") endpoint = "/auth/admin/suspend-user";
-      if (type === "block") endpoint = "/auth/admin/block-user";
-      if (type === "activate") endpoint = "/auth/admin/activate-user";
 
       await api.post(endpoint, { userId });
 
@@ -119,29 +129,18 @@ export default function AdminScreen() {
         </Text>
 
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={[styles.suspend, isBusy && styles.disabled]}
-            onPress={() => confirmAction("suspend", item._id)}
-            disabled={isBusy}
-          >
-            <Text style={styles.actionText}>Suspend</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+  style={[styles.suspend, isBusy && styles.disabled]}
+  onPress={() => confirmAction("suspend", item._id)}
+  disabled={isBusy}
+>
+  <Text style={styles.actionText}>Suspend</Text>
+</TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.block, isBusy && styles.disabled]}
-            onPress={() => confirmAction("block", item._id)}
-            disabled={isBusy}
-          >
-            <Text style={styles.actionText}>Block</Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.activate, isBusy && styles.disabled]}
-            onPress={() => confirmAction("activate", item._id)}
-            disabled={isBusy}
-          >
-            <Text style={styles.actionText}>Activate</Text>
-          </TouchableOpacity>
+
+
+      
         </View>
 
         {isBusy && (
@@ -168,20 +167,37 @@ export default function AdminScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Admin Panel</Text>
+   
 
-      <FlatList
-        data={users}
-        keyExtractor={(item) => item._id}
-        renderItem={renderUser}
-        refreshing={refreshing}
-        onRefresh={() => fetchUsers(true)}
-        contentContainerStyle={{ paddingBottom: 30 }}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No users found</Text>
-        }
-      />
-    </View>
+    {/* 🔍 SEARCH */}
+    <TextInput
+      placeholder="Search by email"
+      placeholderTextColor="#aaa"
+      value={search}
+      onChangeText={setSearch}
+      style={styles.search}
+      autoCapitalize="none"
+    />
+
+    <TouchableOpacity
+  style={styles.blockedBtn}
+  onPress={() => navigation.navigate("BlockedUsers")}
+>
+  <Text style={styles.blockedText}>View Blocked Users</Text>
+</TouchableOpacity>
+
+    <FlatList
+      data={filteredUsers}
+      keyExtractor={(item) => item._id}
+      renderItem={renderUser}
+      refreshing={refreshing}
+      onRefresh={() => fetchUsers(true)}
+      contentContainerStyle={{ paddingBottom: 30 }}
+      ListEmptyComponent={
+        <Text style={styles.empty}>No users found</Text>
+      }
+    />
+  </View>
   );
 }
 
@@ -192,15 +208,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000",
-    padding: 15,
+    paddingTop: 5,
+    padding:20,
   },
-  title: {
-    color: "#ffa726",
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 15,
-  },
+
   card: {
     backgroundColor: "#111",
     borderRadius: 10,
@@ -223,13 +234,17 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
   },
   suspend: {
-    backgroundColor: "#ffa726",
-    padding: 8,
-    borderRadius: 6,
-  },
+  backgroundColor: "#ffa726",
+  paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: "center",
+  marginTop: 10,
+  width: "100%",          // ✅ FULL WIDTH
+},
+
   block: {
     backgroundColor: "#e53935",
     padding: 8,
@@ -258,4 +273,27 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 50,
   },
+  search: {
+  backgroundColor: "#111",
+  borderRadius: 8,
+  padding: 12,
+  color: "#fff",
+  borderWidth: 1,
+  borderColor: "#333",
+  marginBottom: 15,
+},
+blockedBtn: {
+  backgroundColor: "#e53935",
+  padding: 12,
+  borderRadius: 8,
+  marginBottom: 15,
+},
+blockedText: {
+  color: "#fff",
+  fontWeight: "bold",
+  textAlign: "center",
+  fontSize: 16,
+},
+
+
 });

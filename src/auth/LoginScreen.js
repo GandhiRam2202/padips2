@@ -14,7 +14,6 @@ import api from "../api/axios";
 import { AuthContext } from "../auth/AuthContext";
 import Toast from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
-import { saveUser } from "../utils/storage";
 
 /* =======================
    VALIDATION SCHEMA
@@ -64,7 +63,7 @@ export default function LoginScreen({ navigation }) {
     await login(res.data.token, res.data.user);
 
   } catch (err) {
-    console.log("LOGIN ERROR:", err?.response || err);
+    
 
     Toast.show({
       type: "error",

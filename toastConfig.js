@@ -31,6 +31,9 @@ const toastConfig = {
   success: (props) => (
     <SlideToast {...props} bgColor="#1b8f2a" />
   ),
+  info: (props) => (
+    <SlideToast {...props} bgColor="#1b8f2a" />
+  ),
   error: (props) => (
     <SlideToast {...props} bgColor="#e53935" />
   ),

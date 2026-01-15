@@ -13,15 +13,15 @@ export default function App() {
         <NavigationContainer>
           <RootNavigator />
         </NavigationContainer>
-          <Toast
-        config={toastConfig}
-        position="top"
-        topOffset={60}
-      />
+
+        <Toast
+          config={toastConfig}
+          position="top"
+          topOffset={60}
+        />
       </AuthProvider>
+
       <StatusBar style="light" />
     </GestureHandlerRootView>
-  )
-
+  );
 }
-         
