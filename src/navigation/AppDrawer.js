@@ -7,6 +7,10 @@ import { AuthContext } from "../auth/AuthContext";
 import { getUser } from "../utils/storage";
 import { Alert } from "react-native";
 import HomeStack from "./HomeStack";
+import LeaderBoardScreen from "../screens/home/LeaderBoardScreen";
+import FeedbackScreen from "../screens/home/FeedbackScreen";
+import DeveloperProfile from "../screens/home/DeveloperProfile";
+import ProfileScreen from "../screens/home/ProfileScreen";
 
 const Drawer = createDrawerNavigator();
 
@@ -35,7 +39,7 @@ export default function AppDrawer() {
         <Drawer.Navigator
             screenOptions={{
                 headerStyle: { backgroundColor: "#000" },
-                headerTintColor: "#fff",
+                headerTintColor: "#f7bd00ff",
 
                 drawerStyle: {
                     backgroundColor: "rgba(0,0,0,0.75)",
@@ -58,7 +62,12 @@ export default function AppDrawer() {
             <Drawer.Screen
                 name="Home"
                 component={HomeStack}
-                options={{ headerShown: true }}
+                options={{ headerShown: true,
+                     headerTitleStyle: {
+                        fontWeight: "bold",
+                        fontSize: 22,
+                    },
+                 }}
             />
             <Drawer.Screen
                 name="Tests"
@@ -66,6 +75,74 @@ export default function AppDrawer() {
                 options={{
                     headerShown: false,
                     title: "Tests",
+                }}
+            />
+            <Drawer.Screen
+                name="LeaderBoard"
+                component={LeaderBoardScreen}
+                options={{
+                    headerShown: true,
+                    title: "🏆 Leader Board 🏆",
+                    headerStyle: {
+                        backgroundColor: "#000",
+                    },
+                    headerTintColor: "#f7bd00ff", // title + back icon color
+                    headerTitleAlign: "center",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                        fontSize: 22,
+                    },
+                }}
+            />
+            <Drawer.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{
+                    headerShown: true,
+                    title: "Profile",
+                    headerStyle: {
+                        backgroundColor: "#000",
+                    },
+                    headerTintColor: "#f7bd00ff", // title + back icon color
+                    headerTitleAlign: "center",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                        fontSize: 22,
+                    },
+                }}
+            />
+            <Drawer.Screen
+                name="Feedback"
+                component={FeedbackScreen}
+                options={{
+                    headerShown: true,
+                    title: "💬 Feedback",
+                    headerStyle: {
+                        backgroundColor: "#000",
+                    },
+                    headerTintColor: "#f7bd00ff", // title + back icon color
+                    headerTitleAlign: "center",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                        fontSize: 22,
+                    },
+                }}
+            />
+            <Drawer.Screen
+                name="Developer"
+                component={DeveloperProfile}
+                options={{
+                    headerShown: true,
+                    title: "Developer",
+                    headerStyle: {
+                        backgroundColor: "#000",
+                    },
+                    headerTintColor: "#f7bd00ff", // title + back icon color
+                    headerTitleAlign: "center",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                        fontSize: 22,
+                    },
                 }}
             />
 

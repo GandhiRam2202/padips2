@@ -18,13 +18,14 @@ export default function TestStack() {
                     headerShown: true,
                     title: "Tests",
                     headerStyle: { backgroundColor: "#000" },
-                    headerTintColor: "#fff",
+                    headerTintColor: "#f7bd00ff",
                     headerTitleAlign: "center",
+                    
                     headerLeft: () => (
                         <TouchableOpacity
                             onPress={() => navigation.openDrawer()}
                         >
-                            <Ionicons name="menu" size={26} color="#fff" />
+                            <Ionicons name="menu" size={26} color="#f7bd00ff" />
                         </TouchableOpacity>
                     ),
                 })}
