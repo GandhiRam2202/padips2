@@ -43,7 +43,7 @@ export default function RegisterScreen({ navigation }) {
     try {
       setLoading(true);
 
-      await api.post("/auth/register", {
+      await api.post("/register", {
         name: values.name,
         email: values.email,
         password: values.password,

@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { clearSession } from "../utils/storage";
 
 const api = axios.create({
-  baseURL: "https://padips2back.onrender.com",
+  baseURL: "https://padips2back.onrender.com/auth",
   timeout: 10000,
   headers: {
     "x-api-key": "PADIPS2_SECERET_KEY",

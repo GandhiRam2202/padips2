@@ -41,7 +41,7 @@ export default function LoginScreen({ navigation }) {
   try {
     setLoading(true);
 
-    const res = await api.post("/auth/login", values);
+    const res = await api.post("/login", values);
   
 
     // ❌ Invalid response guard
@@ -61,6 +61,8 @@ export default function LoginScreen({ navigation }) {
 
     // 🔥 MUST pass BOTH
     await login(res.data.token, res.data.user);
+  
+    
 
   } catch (err) {
     

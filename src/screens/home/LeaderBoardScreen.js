@@ -19,7 +19,7 @@ export default function LeaderBoardScreen() {
   const fetchLeaderboard = async () => {
     try {
 
-      const res = await api.get("/auth/tests/leaderboard");
+      const res = await api.get("/tests/leaderboard");
 
       if (res.data?.success) {
         setData(res.data.data || []);

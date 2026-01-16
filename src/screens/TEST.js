@@ -35,7 +35,7 @@ export default function TestScreen({ navigation }) {
       }
 
       // ✅ 1. Get available tests
-      const testRes = await api.get("/auth/tests");
+      const testRes = await api.get("/tests");
       const testList = testRes.data?.data || [];
 
       setTests(testList);
@@ -45,7 +45,7 @@ export default function TestScreen({ navigation }) {
       const scoreMap = {};
 
       for (const testNo of testList) {
-        const res = await api.post("/auth/tests/check-attempt", {
+        const res = await api.post("/tests/check-attempt", {
           test: testNo,
           email: user.email,
         });

@@ -22,7 +22,7 @@ export default function LearnQuestionsScreen({ route }) {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await api.post("/auth/tests/questions", { test });
+        const res = await api.post("/tests/questions", { test });
 
         if (!res.data?.success) {
           throw new Error("Failed");

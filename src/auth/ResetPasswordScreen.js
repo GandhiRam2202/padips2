@@ -75,10 +75,10 @@ export default function ResetPasswordScreen({ route, navigation }) {
     try {
       setResetLoading(true);
 
-      await api.post("/auth/reset-password", {
+      await api.post("/reset-password", {
         email,
         otp: values.otp,
-        newPassword: values.password,
+        password: values.password, // ✅ MUST MATCH BACKEND
       });
 
       Toast.show({
@@ -99,6 +99,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
     }
   };
 
+
   /* =====================
      RESEND OTP
   ====================== */
@@ -106,7 +107,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
     try {
       setResendLoading(true);
 
-      const res = await api.post("/auth/forgot-password", { email });
+      const res = await api.post("/forgot-password", { email });
 
       Toast.show({
         type: "success",

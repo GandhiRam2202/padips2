@@ -11,6 +11,7 @@ import LeaderBoardScreen from "../screens/home/LeaderBoardScreen";
 import FeedbackScreen from "../screens/home/FeedbackScreen";
 import DeveloperProfile from "../screens/home/DeveloperProfile";
 import ProfileScreen from "../screens/home/ProfileScreen";
+import WishesChatScreen from "../screens/WishesChatScreen";
 
 const Drawer = createDrawerNavigator();
 
@@ -44,7 +45,7 @@ export default function AppDrawer() {
                 drawerStyle: {
                     backgroundColor: "rgba(0,0,0,0.75)",
                     width: "45%",
-                    paddingTop:50,
+                    paddingTop: 50,
                 },
 
                 // ✅ DRAWER TEXT COLOR
@@ -63,12 +64,13 @@ export default function AppDrawer() {
             <Drawer.Screen
                 name="Home"
                 component={HomeStack}
-                options={{ headerShown: true,
-                     headerTitleStyle: {
+                options={{
+                    headerShown: true,
+                    headerTitleStyle: {
                         fontWeight: "bold",
                         fontSize: 22,
                     },
-                 }}
+                }}
             />
             <Drawer.Screen
                 name="Tests"
@@ -112,6 +114,17 @@ export default function AppDrawer() {
                     },
                 }}
             />
+            <Drawer.Screen
+                name="Wishes"
+                component={WishesChatScreen}
+                options={{
+                    title: "🎉 Wishes",
+                    headerStyle: { backgroundColor: "#000" },
+                    headerTintColor: "#FFD700",
+                    headerTitleStyle: { fontWeight: "bold" },
+                }}
+            />
+
             <Drawer.Screen
                 name="Feedback"
                 component={FeedbackScreen}

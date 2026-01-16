@@ -27,7 +27,7 @@ export default function BlockedUsersScreen() {
   ====================== */
   const fetchBlockedUsers = async () => {
     try {
-      const res = await api.get("/auth/admin/users");
+      const res = await api.get("/admin/users");
 
       const blocked = (res.data.users || []).filter(
         (u) => u.isBlocked || u.status === "suspended"
@@ -76,7 +76,7 @@ export default function BlockedUsersScreen() {
     try {
       setActionLoading(userId);
 
-      await api.post("/auth/admin/activate-user", { userId });
+      await api.post("/admin/activate-user", { userId });
 
       Toast.show({
         type: "success",

@@ -28,7 +28,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     try {
       setLoading(true);
 
-      const res = await api.post("/auth/forgot-password", {
+      const res = await api.post("/forgot-password", {
         email: values.email,
       });
 

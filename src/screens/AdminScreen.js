@@ -36,7 +36,7 @@ export default function AdminScreen() {
   const fetchUsers = async (isRefresh = false) => {
     try {
       isRefresh ? setRefreshing(true) : setLoading(true);
-      const res = await api.get("/auth/admin/users");
+      const res = await api.get("/admin/users");
       setUsers(res.data.users || []);
     } catch (err) {
       Toast.show({
@@ -65,7 +65,7 @@ export default function AdminScreen() {
     try {
       setActionLoading(selectedUser);
 
-      await api.post("/auth/admin/suspend-user", {
+      await api.post("/admin/suspend-user", {
         userId: selectedUser,
         reason,
       });

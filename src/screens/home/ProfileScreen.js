@@ -41,7 +41,7 @@ const loadScores = async () => {
 
     const user = JSON.parse(userData);
 
-    const res = await api.post("/auth/tests/profile", {
+    const res = await api.post("/tests/profile", {
       email: user.email,   // ✅ send email in req.body
     });
 
@@ -110,8 +110,8 @@ const loadScores = async () => {
       </View>
 
       {/* USER INFO */}
-      <Text style={styles.text}>Name : {user?.name}</Text>
-      <Text style={styles.text}>Mail : {user?.email}</Text>
+      <Text style={styles.text}>{user?.name}</Text>
+      <Text style={styles.text}>{user?.email}</Text>
 
       {/* SCORES */}
       <Text style={styles.sectionTitle}>📊 Test Scores</Text>
@@ -156,14 +156,14 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   text: {
-    paddingLeft: 40,
+    textAlign:"center",
     fontSize: 22,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#0db107ff",
     marginBottom: 6,
   },
   sectionTitle: {
-    color: "#fff",
+    color: "#ff0000ff",
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 20,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#d80808ff",
   },
   empty: {
     color: "#aaa",

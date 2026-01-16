@@ -30,13 +30,10 @@ export default function TestQuestionScreen({ route, navigation }) {
     const [answers, setAnswers] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [reviewMode, setReviewMode] = useState(false);
-
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-
     const [timeLeft, setTimeLeft] = useState(0);
     const [timerStarted, setTimerStarted] = useState(false);
-
     const timerRef = useRef(null);
 
     /* ================= BLOCK BACK ================= */
@@ -53,7 +50,7 @@ export default function TestQuestionScreen({ route, navigation }) {
         try {
             const user = await getUser();
 
-            const res = await api.post("/auth/tests/check-attempt", {
+            const res = await api.post("/tests/check-attempt", {
                 test,
                 email: user.email,
             });
@@ -85,7 +82,7 @@ export default function TestQuestionScreen({ route, navigation }) {
 
             await checkAttempt();
 
-            const res = await api.post("/auth/tests/questions", { test });
+            const res = await api.post("/tests/questions", { test });
 
             if (!res.data?.success || !Array.isArray(res.data.data)) {
                 throw new Error("Invalid questions");
@@ -158,7 +155,7 @@ export default function TestQuestionScreen({ route, navigation }) {
 
             const user = await getUser();
 
-            await api.post("/auth/tests/submit", {
+            await api.post("/tests/submit", {
                 test,
                 score,
                 email: user.email,
