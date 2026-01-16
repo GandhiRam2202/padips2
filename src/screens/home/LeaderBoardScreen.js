@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../api/axios";
 
 
@@ -19,11 +18,8 @@ export default function LeaderBoardScreen() {
   /* ================= FETCH LEADERBOARD ================= */
   const fetchLeaderboard = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
 
-      const res = await api.post("/auth/tests/leaderboard", {
-        token, // ✅ PADIPS2 token pattern
-      });
+      const res = await api.get("/auth/tests/leaderboard");
 
       if (res.data?.success) {
         setData(res.data.data || []);
@@ -64,7 +60,7 @@ export default function LeaderBoardScreen() {
       <View style={styles.userBox}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.sub}>
-          Tests: {item.test} | Total: {item.totalScore}
+          Tests: {item.tests} | Total: {item.totalScore}
         </Text>
       </View>
 

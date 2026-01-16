@@ -27,30 +27,38 @@ export default function ProfileScreen() {
   const loadUserFromStorage = async () => {
     const userData = await AsyncStorage.getItem("user");
     if (userData) {
-      setUser(JSON.parse(userData));
+        setUser(JSON.parse(userData));
     }
-  };
+};
 
-  /* =====================
-     FETCH TEST SCORES ONLY
-  ====================== */
-  const loadScores = async () => {
-    try {
-      const res = await api.get("/auth/tests/profile");
+/* =====================
+FETCH TEST SCORES ONLY
+====================== */
+const loadScores = async () => {
+  try {
+    const userData = await AsyncStorage.getItem("user");
+    if (!userData) return;
 
-      if (Array.isArray(res.data?.data)) {
-        setResults(res.data.data);
-      } else {
-        setResults([]);
-      }
-    } catch {
-      Toast.show({
-        type: "error",
-        text1: "Failed to load test scores",
-      });
+    const user = JSON.parse(userData);
+
+    const res = await api.post("/auth/tests/profile", {
+      email: user.email,   // ✅ send email in req.body
+    });
+
+    if (Array.isArray(res.data?.data)) {
+      setResults(res.data.data);
+    } else {
       setResults([]);
     }
-  };
+  } catch (err) {
+    Toast.show({
+      type: "error",
+      text1: "Failed to load test scores",
+    });
+    setResults([]);
+  }
+};
+
 
   /* =====================
      INITIAL LOAD

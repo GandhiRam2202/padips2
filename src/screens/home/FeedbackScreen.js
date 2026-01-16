@@ -53,7 +53,7 @@ export default function FeedbackScreen({ navigation }) {
     try {
       setLoading(true);
 
-      const res = await api.post("/auth/send-email", {
+      const res = await api.post("/auth/feedback", {
         name: user.name,
         email: user.email,
         feedback,
