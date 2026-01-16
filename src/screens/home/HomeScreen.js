@@ -43,7 +43,7 @@ export default function HomeScreen({ navigation }) {
         navigation.navigate("LearnQuestions", { test: item })
       }
     >
-      <Text style={styles.btnText}>Test {item}</Text>
+      <Text style={styles.btnText}>Q & A - {item}</Text>
     </TouchableOpacity>
   );
 

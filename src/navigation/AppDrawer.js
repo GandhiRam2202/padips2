@@ -44,6 +44,7 @@ export default function AppDrawer() {
                 drawerStyle: {
                     backgroundColor: "rgba(0,0,0,0.75)",
                     width: "45%",
+                    paddingTop:50,
                 },
 
                 // ✅ DRAWER TEXT COLOR

@@ -30,8 +30,10 @@ export default function TestQuestionScreen({ route, navigation }) {
     const [answers, setAnswers] = useState({});
     const [submitted, setSubmitted] = useState(false);
     const [reviewMode, setReviewMode] = useState(false);
+
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+
     const [timeLeft, setTimeLeft] = useState(0);
     const [timerStarted, setTimerStarted] = useState(false);
 
@@ -65,10 +67,10 @@ export default function TestQuestionScreen({ route, navigation }) {
                 Toast.show({
                     type: "info",
                     text1: "Review Mode",
-                    text2: "Test Already Submited",
+                    text2: "You already attempted this test",
                 });
             }
-        } catch (err) {
+        } catch {
             Toast.show({
                 type: "error",
                 text1: "Failed to verify test status",
@@ -120,7 +122,7 @@ export default function TestQuestionScreen({ route, navigation }) {
         }, 1000);
 
         return () => clearInterval(timerRef.current);
-    }, [timeLeft, submitted, timerStarted, reviewMode]);
+    }, [timeLeft, timerStarted, reviewMode, submitted]);
 
     /* ================= AUTO SUBMIT ================= */
     useEffect(() => {
@@ -152,7 +154,6 @@ export default function TestQuestionScreen({ route, navigation }) {
             let score = 0;
             questions.forEach((q, i) => {
                 if (answers[i] === q.correctAnswer) score += 1.5;
-
             });
 
             const user = await getUser();
@@ -172,7 +173,7 @@ export default function TestQuestionScreen({ route, navigation }) {
             });
 
             setTimeout(() => {
-                navigation.popToTop(); // ✅ BACK TO TEST LIST
+                navigation.popToTop();
             }, 800);
         } finally {
             setSubmitting(false);
@@ -210,6 +211,8 @@ export default function TestQuestionScreen({ route, navigation }) {
     /* ================= RENDER ================= */
     return (
         <View style={styles.container}>
+
+
             {!reviewMode && !submitted && (
                 <Text style={styles.timer}>⏱ {formatTime(timeLeft)}</Text>
             )}
@@ -225,7 +228,6 @@ export default function TestQuestionScreen({ route, navigation }) {
                 const correct = i === question.correctAnswer;
 
                 let bg = "#fff";
-
                 if (reviewMode || submitted) {
                     if (correct) bg = "#4caf50";
                     else if (selected) bg = "#777";
@@ -246,6 +248,12 @@ export default function TestQuestionScreen({ route, navigation }) {
                     </TouchableOpacity>
                 );
             })}
+            {reviewMode && (
+                <>
+                    <Text style={styles.explanation}>Explanation</Text>
+                    <Text style={styles.question}>{question.explanation}</Text>
+                </>
+            )}
 
             <View style={styles.navRow}>
                 <TouchableOpacity
@@ -282,14 +290,33 @@ export default function TestQuestionScreen({ route, navigation }) {
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#000", padding: 20 },
     center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+    reviewLabel: {
+        color: "#FFD700",
+        fontWeight: "bold",
+        textAlign: "center",
+        marginBottom: 6,
+    },
+
     timer: { color: "#ff0000", fontSize: 20, fontWeight: "bold", textAlign: "center" },
     count: { color: "#fff", textAlign: "center", fontWeight: "bold" },
     question: { color: "#fff", fontSize: 20, fontWeight: "bold", marginVertical: 20 },
-    option: { padding: 14, borderRadius: 8, borderWidth: 1, borderColor: "#fff", marginBottom: 12 },
+    explanation: { color: "#ff0000ff", fontSize: 20, fontWeight: "bold", marginTop: 20 },
+
+    option: {
+        padding: 14,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#fff",
+        marginBottom: 12,
+    },
+
     optionText: { fontSize: 18, fontWeight: "bold" },
+
     navRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 20 },
     navBtn: { backgroundColor: "#ff0000", padding: 14, borderRadius: 8, width: "45%" },
     submitBtn: { backgroundColor: "#1b8f2a", padding: 14, borderRadius: 8, width: "45%" },
+
     navText: { color: "#fff", textAlign: "center", fontWeight: "bold" },
     submitText: { color: "#fff", textAlign: "center", fontWeight: "bold" },
     disabled: { opacity: 0.5 },

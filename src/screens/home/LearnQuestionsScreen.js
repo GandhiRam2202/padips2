@@ -15,6 +15,7 @@ export default function LearnQuestionsScreen({ route }) {
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
+
   /* =====================
      FETCH QUESTIONS
   ====================== */
@@ -66,14 +67,14 @@ export default function LearnQuestionsScreen({ route }) {
 
       {q.options.map((opt, i) => {
         const isCorrect = i === q.correctAnswer;
-
+        
         return (
           <View
-            key={i}
-            style={[
-              styles.option,
-              isCorrect && styles.correct,
-            ]}
+          key={i}
+          style={[
+            styles.option,
+            isCorrect && styles.correct,
+          ]}
           >
             <Text style={styles.optionText}>
               {i + 1}. {opt}
@@ -81,6 +82,9 @@ export default function LearnQuestionsScreen({ route }) {
           </View>
         );
       })}
+
+      <Text style={styles.explanation}>Explanation</Text>
+      <Text style={styles.question}>{q.explanation}</Text>
 
       <View style={styles.navRow}>
         <TouchableOpacity
@@ -131,6 +135,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
+  },
+  explanation: {
+    color: "#ff0000ff",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginTop: 20,
   },
   option: {
     padding: 14,
