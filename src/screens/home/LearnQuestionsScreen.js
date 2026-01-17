@@ -3,22 +3,22 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import api from "../../api/axios";
+
+const { width } = Dimensions.get("window");
 
 export default function LearnQuestionsScreen({ route }) {
   const { test } = route.params;
 
   const [questions, setQuestions] = useState([]);
-  const [index, setIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  /* =====================
-     FETCH QUESTIONS
-  ====================== */
+  /* ================= FETCH QUESTIONS ================= */
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
@@ -35,6 +35,7 @@ export default function LearnQuestionsScreen({ route }) {
     fetchQuestions();
   }, [test]);
 
+  /* ================= UI STATES ================= */
   if (loading) {
     return (
       <View style={styles.center}>
@@ -46,79 +47,108 @@ export default function LearnQuestionsScreen({ route }) {
   if (!questions.length) {
     return (
       <View style={styles.center}>
-        <Text style={styles.empty}>No questions found</Text>
+        <Text>No questions found</Text>
       </View>
     );
   }
 
-  const q = questions[index];
-
+  /* ================= RENDER ================= */
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* HEADER */}
-      <Text style={styles.count}>
-        Test {test} • Question {index + 1} of {questions.length}
-      </Text>
-
-      {/* QUESTION CARD */}
-      <View style={styles.card}>
-        <Text style={styles.question}>{q.question}</Text>
-      </View>
-
-      {/* OPTIONS */}
-      {q.options.map((opt, i) => {
-        const isCorrect = i === q.correctAnswer;
-
-        return (
-          <View
-            key={i}
-            style={[
-              styles.option,
-              isCorrect && styles.correct,
-            ]}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                isCorrect && styles.correctText,
-              ]}
-            >
-              {i + 1}. {opt}
-            </Text>
-          </View>
+    <ScrollView
+      horizontal
+      pagingEnabled
+      showsHorizontalScrollIndicator={false}
+      onMomentumScrollEnd={(e) => {
+        const page = Math.round(
+          e.nativeEvent.contentOffset.x / width
         );
-      })}
+        setCurrentIndex(page);
+      }}
+    >
+      {questions.map((q, qIndex) => (
+        <View key={q._id || qIndex} style={styles.page}>
+          {/* HEADER */}
+          <Text style={styles.count}>
+            Test {test} • Question {qIndex + 1} / {questions.length}
+          </Text>
 
-      {/* EXPLANATION */}
-      <Text style={styles.exTitle}>Explanation</Text>
-      <View style={styles.exBox}>
-        <Text style={styles.exText}>{q.explanation}</Text>
-      </View>
+          <Text style={styles.swipeHint}>
+            ⬅ Swipe right • Swipe left ➡
+          </Text>
 
-      {/* NAVIGATION */}
-      <View style={styles.navRow}>
-        <TouchableOpacity
-          disabled={index === 0}
-          onPress={() => setIndex(index - 1)}
-          style={[
-            styles.navBtn,
-            index === 0 && styles.disabled,
-          ]}
-        >
-          <Text style={styles.navText}>Previous</Text>
-        </TouchableOpacity>
+          {/* ===== TAMIL QUESTION ===== */}
+          <View style={styles.card}>
+            <Text style={styles.question}>{q.question.tamil}</Text>
 
-        <TouchableOpacity
-          disabled={index === questions.length - 1}
-          onPress={() => setIndex(index + 1)}
-          style={[
-            styles.navBtn,
-            index === questions.length - 1 && styles.disabled,
-          ]}
-        >
-          <Text style={styles.navText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+            {q.options.map((opt, i) => {
+              const isCorrect = i === q.correctAnswer;
+
+              return (
+                <View
+                  key={`ta-${i}`}
+                  style={[
+                    styles.option,
+                    isCorrect && styles.correct,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      isCorrect && styles.correctText,
+                    ]}
+                  >
+                    {i + 1}. {opt.tamil}
+                  </Text>
+                </View>
+              );
+            })}
+
+            {/* Tamil Explanation */}
+            <View style={styles.exBox}>
+              <Text style={styles.exTitle}>விளக்கம்</Text>
+              <Text style={styles.exText}>
+                {q.explanation?.tamil || "—"}
+              </Text>
+            </View>
+          </View>
+
+          {/* ===== ENGLISH QUESTION ===== */}
+          <View style={styles.card}>
+            <Text style={styles.question}>{q.question.english}</Text>
+
+            {q.options.map((opt, i) => {
+              const isCorrect = i === q.correctAnswer;
+
+              return (
+                <View
+                  key={`en-${i}`}
+                  style={[
+                    styles.option,
+                    isCorrect && styles.correct,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      isCorrect && styles.correctText,
+                    ]}
+                  >
+                    {i + 1}. {opt.english}
+                  </Text>
+                </View>
+              );
+            })}
+
+            {/* English Explanation */}
+            <View style={styles.exBox}>
+              <Text style={styles.exTitle}>Explanation</Text>
+              <Text style={styles.exText}>
+                {q.explanation?.english || "—"}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ))}
     </ScrollView>
   );
 }
@@ -127,25 +157,27 @@ export default function LearnQuestionsScreen({ route }) {
         STYLES
 ===================== */
 const styles = StyleSheet.create({
-  container: {
+  page: {
+    width,
     padding: 20,
     backgroundColor: "#fff",
   },
   center: {
     flex: 1,
-    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },
-  empty: {
-    color: "#777",
-    fontSize: 16,
-  },
   count: {
     textAlign: "center",
+    marginBottom: 6,
     color: "#666",
-    marginBottom: 16,
     fontWeight: "600",
+  },
+  swipeHint: {
+    textAlign: "center",
+    fontSize: 13,
+    color: "#999",
+    marginBottom: 14,
   },
   card: {
     backgroundColor: "#f4f6ff",
@@ -154,66 +186,46 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   question: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
+    marginBottom: 12,
     color: "#000",
   },
   option: {
     backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 14,
+    padding: 14,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#ddd",
-    marginBottom: 12,
+    marginBottom: 10,
+  },
+  optionText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+  },
+  exBox: {
+    backgroundColor: "#f9f9f9",
+    padding: 14,
+    borderRadius: 12,
+    marginTop: 10,
+  },
+  exTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+    color: "#4f7cff",
+  },
+  exText: {
+    fontSize: 14,
+    color: "#333",
   },
   correct: {
     backgroundColor: "#e8f8ee",
     borderColor: "#2e7d32",
   },
-  optionText: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "600",
-  },
   correctText: {
     color: "#2e7d32",
-  },
-  exTitle: {
-    fontSize: 18,
     fontWeight: "bold",
-    color: "#4f7cff",
-    marginTop: 20,
-    marginBottom: 6,
-  },
-  exBox: {
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 14,
-  },
-  exText: {
-    color: "#333",
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  navRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 24,
-    marginBottom: 30,
-  },
-  navBtn: {
-    backgroundColor: "#4f7cff",
-    paddingVertical: 14,
-    borderRadius: 30,
-    width: "45%",
-  },
-  navText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-    fontSize: 16,
-  },
-  disabled: {
-    opacity: 0.5,
   },
 });

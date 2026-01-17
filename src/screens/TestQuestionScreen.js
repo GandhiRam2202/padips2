@@ -7,12 +7,15 @@ import {
   ActivityIndicator,
   BackHandler,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import api from "../api/axios";
 import { getUser } from "../utils/storage";
 
-/* 🔀 SHUFFLE */
+const { width } = Dimensions.get("window");
+
+/* 🔀 SHUFFLE QUESTIONS */
 const shuffleArray = (arr) => {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i--) {
@@ -33,6 +36,7 @@ export default function TestQuestionScreen({ route, navigation }) {
   const [reviewMode, setReviewMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
   const [timeLeft, setTimeLeft] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
   const timerRef = useRef(null);
@@ -50,7 +54,6 @@ export default function TestQuestionScreen({ route, navigation }) {
   const checkAttempt = async () => {
     try {
       const user = await getUser();
-
       const res = await api.post("/tests/check-attempt", {
         test,
         email: user.email,
@@ -91,7 +94,7 @@ export default function TestQuestionScreen({ route, navigation }) {
       setQuestions(shuffled);
 
       if (!reviewMode) {
-        setTimeLeft(shuffled.length * 60);
+        setTimeLeft(shuffled.length * 90); // 1.5 min per question
         setTimerStarted(true);
       }
     } catch {
@@ -123,20 +126,13 @@ export default function TestQuestionScreen({ route, navigation }) {
   useEffect(() => {
     if (
       timerStarted &&
-      !reviewMode &&
       timeLeft === 0 &&
-      !submitted &&
-      !submitting
+      !reviewMode &&
+      !submitted
     ) {
       submitTest();
     }
-  }, [timeLeft, timerStarted, reviewMode]);
-
-  /* ================= SELECT OPTION ================= */
-  const selectOption = (index) => {
-    if (submitted || reviewMode) return;
-    setAnswers((prev) => ({ ...prev, [currentIndex]: index }));
-  };
+  }, [timeLeft, timerStarted, reviewMode, submitted]);
 
   /* ================= SUBMIT TEST ================= */
   const submitTest = async () => {
@@ -145,6 +141,7 @@ export default function TestQuestionScreen({ route, navigation }) {
     try {
       setSubmitting(true);
       clearInterval(timerRef.current);
+      setTimerStarted(false);
 
       let score = 0;
       questions.forEach((q, i) => {
@@ -152,7 +149,6 @@ export default function TestQuestionScreen({ route, navigation }) {
       });
 
       const user = await getUser();
-
       await api.post("/tests/submit", {
         test,
         score,
@@ -167,15 +163,13 @@ export default function TestQuestionScreen({ route, navigation }) {
         text1: "Test submitted successfully",
       });
 
-      setTimeout(() => {
-        navigation.popToTop();
-      }, 800);
+      setTimeout(() => navigation.popToTop(), 800);
     } finally {
       setSubmitting(false);
     }
   };
 
-  /* ================= HELPERS ================= */
+  /* ================= FORMAT TIME ================= */
   const formatTime = (sec) => {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
@@ -196,148 +190,209 @@ export default function TestQuestionScreen({ route, navigation }) {
   if (!questions.length) {
     return (
       <View style={styles.center}>
-        <Text style={styles.empty}>No questions available</Text>
+        <Text>No questions available</Text>
       </View>
     );
   }
 
-  const question = questions[currentIndex];
-
   /* ================= RENDER ================= */
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {!reviewMode && !submitted && (
-        <Text style={styles.timer}>
-          ⏱ {formatTime(timeLeft)}
-        </Text>
-      )}
-
-      <Text style={styles.count}>
-        Question {currentIndex + 1} of {questions.length}
-      </Text>
-
-      {/* QUESTION */}
-      <View style={styles.card}>
-        <Text style={styles.question}>{question.question}</Text>
-      </View>
-
-      {/* OPTIONS */}
-      {question.options.map((opt, i) => {
-        const selected = answers[currentIndex] === i;
-        const correct = i === question.correctAnswer;
-
-        let bg = "#fff";
-        let border = "#ddd";
-        let color = "#333";
-
-        if (reviewMode || submitted) {
-          if (correct) {
-            bg = "#e8f8ee";
-            border = "#2e7d32";
-            color = "#2e7d32";
-          } else if (selected) {
-            bg = "#f5f5f5";
-          }
-        } else if (selected) {
-          bg = "#f4f6ff";
-          border = "#4f7cff";
-          color = "#4f7cff";
-        }
-
-        return (
-          <TouchableOpacity
-            key={i}
-            style={[
-              styles.option,
-              { backgroundColor: bg, borderColor: border },
-            ]}
-            onPress={() => selectOption(i)}
-            disabled={submitted || reviewMode}
-          >
-            <Text style={[styles.optionText, { color }]}>
-              {i + 1}. {opt}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-
-      {/* EXPLANATION */}
-      {reviewMode && (
-        <>
-          <Text style={styles.exTitle}>Explanation</Text>
-          <View style={styles.exBox}>
-            <Text style={styles.exText}>
-              {question.explanation}
-            </Text>
-          </View>
-        </>
-      )}
-
-      {/* NAVIGATION */}
-      <View style={styles.navRow}>
-        <TouchableOpacity
-          disabled={currentIndex === 0}
-          onPress={() => setCurrentIndex((i) => i - 1)}
-          style={[
-            styles.navBtn,
-            currentIndex === 0 && styles.disabled,
-          ]}
-        >
-          <Text style={styles.navText}>Previous</Text>
-        </TouchableOpacity>
-
-        {currentIndex < questions.length - 1 ? (
-          <TouchableOpacity
-            onPress={() => setCurrentIndex((i) => i + 1)}
-            style={styles.navBtn}
-          >
-            <Text style={styles.navText}>Next</Text>
-          </TouchableOpacity>
-        ) : (
-          !submitted &&
-          !reviewMode && (
-            <TouchableOpacity
-              onPress={submitTest}
-              style={styles.submitBtn}
-            >
-              <Text style={styles.submitText}>
-                Submit Test
+    <>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) => {
+          const page = Math.round(
+            e.nativeEvent.contentOffset.x / width
+          );
+          setCurrentIndex(page);
+        }}
+      >
+        {questions.map((question, qIndex) => (
+          <View key={question._id} style={styles.page}>
+            {!reviewMode && !submitted && (
+              <Text style={styles.timer}>
+                ⏱ {formatTime(timeLeft)}
               </Text>
-            </TouchableOpacity>
-          )
+            )}
+
+            <Text style={styles.count}>
+              Question {qIndex + 1} of {questions.length}
+            </Text>
+
+            {/* ===== TAMIL ===== */}
+            <View style={styles.card}>
+              <Text style={styles.question}>
+                {question.question.tamil}
+              </Text>
+
+              {question.options.map((opt, i) => {
+                const selected = answers[qIndex] === i;
+                const correct = i === question.correctAnswer;
+
+                let bg = "#fff";
+                let border = "#ddd";
+                let color = "#333";
+
+                if (reviewMode || submitted) {
+                  if (correct) {
+                    bg = "#e8f8ee";
+                    border = "#2e7d32";
+                    color = "#2e7d32";
+                  } else if (selected) {
+                    bg = "#f5f5f5";
+                  }
+                } else if (selected) {
+                  bg = "#f4f6ff";
+                  border = "#4f7cff";
+                  color = "#4f7cff";
+                }
+               
+
+                return (
+                  <TouchableOpacity
+                    key={i}
+                    style={[
+                      styles.option,
+                      { backgroundColor: bg, borderColor: border },
+                    ]}
+                    onPress={() =>
+                      !submitted &&
+                      !reviewMode &&
+                      setAnswers((prev) => ({
+                        ...prev,
+                        [qIndex]: i,
+                      }))
+                    }
+                  >
+                    <Text style={[styles.optionText, { color }]}>
+                      {i + 1}. {opt.tamil}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+               {/* ===== TAMIL EXPLANATION ===== */ }
+                {
+                  (reviewMode || submitted) && (
+                    <>
+                      <Text style={styles.exTitle}>விளக்கம்</Text>
+                      <View style={styles.exBox}>
+                        <Text style={styles.exText}>
+                          {question.explanation?.tamil || "—"}
+                        </Text>
+                      </View>
+                    </>
+                  )
+                }
+            </View>
+
+            {/* ===== ENGLISH ===== */}
+            <View style={styles.card}>
+              <Text style={styles.question}>
+                {question.question.english}
+              </Text>
+
+              {question.options.map((opt, i) => {
+                const selected = answers[qIndex] === i;
+                const correct = i === question.correctAnswer;
+
+                let bg = "#fff";
+                let border = "#ddd";
+                let color = "#333";
+
+                if (reviewMode || submitted) {
+                  if (correct) {
+                    bg = "#e8f8ee";
+                    border = "#2e7d32";
+                    color = "#2e7d32";
+                  } else if (selected) {
+                    bg = "#f5f5f5";
+                  }
+                } else if (selected) {
+                  bg = "#f4f6ff";
+                  border = "#4f7cff";
+                  color = "#4f7cff";
+                }
+             
+
+
+
+
+                return (
+                  <TouchableOpacity
+                    key={i}
+                    style={[
+                      styles.option,
+                      { backgroundColor: bg, borderColor: border },
+                    ]}
+                    onPress={() =>
+                      !submitted &&
+                      !reviewMode &&
+                      setAnswers((prev) => ({
+                        ...prev,
+                        [qIndex]: i,
+                      }))
+                    }
+                  >
+                    <Text style={[styles.optionText, { color }]}>
+                      {i + 1}. {opt.english}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+                 {/* ===== ENGLISH EXPLANATION ===== */ }
+                {
+                  (reviewMode || submitted) && (
+                    <>
+                      <Text style={styles.exTitle}>Explanation</Text>
+                      <View style={styles.exBox}>
+                        <Text style={styles.exText}>
+                          {question.explanation?.english || "—"}
+                        </Text>
+                      </View>
+                    </>
+                  )
+                }
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      {/* ===== SUBMIT BUTTON (ONLY ON LAST QUESTION) ===== */}
+      {currentIndex === questions.length - 1 &&
+        !submitted &&
+        !reviewMode && (
+          <TouchableOpacity
+            style={styles.submitBtn}
+            onPress={submitTest}
+            disabled={submitting}
+          >
+            <Text style={styles.submitText}>
+              {submitting ? "Submitting..." : "Submit Test"}
+            </Text>
+          </TouchableOpacity>
         )}
-      </View>
-    </ScrollView>
+    </>
   );
+
 }
 
 /* ================= STYLES ================= */
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: "#fff",
-  },
-  center: {
-    flex: 1,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  empty: {
-    color: "#777",
-  },
+  page: { width, padding: 20, backgroundColor: "#fff" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
   timer: {
     textAlign: "center",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#ff5252",
-    marginBottom: 6,
   },
   count: {
     textAlign: "center",
+    marginBottom: 10,
     color: "#666",
     fontWeight: "600",
-    marginBottom: 12,
   },
   card: {
     backgroundColor: "#f4f6ff",
@@ -348,7 +403,7 @@ const styles = StyleSheet.create({
   question: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#000",
+    marginBottom: 12,
   },
   option: {
     padding: 16,
@@ -365,50 +420,30 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#4f7cff",
     marginTop: 20,
-    marginBottom: 6,
   },
   exBox: {
     backgroundColor: "#f9f9f9",
     padding: 16,
     borderRadius: 14,
+    marginTop: 6,
   },
   exText: {
-    fontSize: 18,
-    color: "#333",
-    lineHeight: 22,
-    fontWeight:"bold"
-  },
-  navRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 24,
-    marginBottom: 30,
-  },
-  navBtn: {
-    backgroundColor: "#4f7cff",
-    paddingVertical: 14,
-    borderRadius: 30,
-    width: "45%",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   submitBtn: {
     backgroundColor: "#2e7d32",
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: 30,
-    width: "45%",
+    marginTop: 10,
+    marginBottom: 30,
   },
-  navText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
+
   submitText: {
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",
     fontSize: 16,
   },
-  disabled: {
-    opacity: 0.5,
-  },
+
 });
