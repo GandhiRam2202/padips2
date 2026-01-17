@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
-import api from "../api/axios"; // ✅ axios with token interceptor
+import api from "../api/axios";
 import { getUser } from "../utils/storage";
 
 export default function TestScreen({ navigation }) {
@@ -34,13 +34,10 @@ export default function TestScreen({ navigation }) {
         return;
       }
 
-      // ✅ 1. Get available tests
       const testRes = await api.get("/tests");
       const testList = testRes.data?.data || [];
-
       setTests(testList);
 
-      // ✅ 2. Check attempts
       const attemptMap = {};
       const scoreMap = {};
 
@@ -56,7 +53,7 @@ export default function TestScreen({ navigation }) {
 
       setAttempted(attemptMap);
       setScores(scoreMap);
-    } catch (err) {
+    } catch {
       Toast.show({
         type: "error",
         text1: "Failed to load tests",
@@ -88,22 +85,18 @@ export default function TestScreen({ navigation }) {
      START TEST
   ====================== */
   const confirmStartTest = (testNo) => {
-    Alert.alert(
-      "Start Test",
-      "Are you ready to take the test?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Start",
-          onPress: () =>
-            navigation.navigate("TestQuestion", {
-              test: testNo,
-              mode: "test",
-              startIndex: 0,
-            }),
-        },
-      ]
-    );
+    Alert.alert("Start Test", "Are you ready to take the test?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Start",
+        onPress: () =>
+          navigation.navigate("TestQuestion", {
+            test: testNo,
+            mode: "test",
+            startIndex: 0,
+          }),
+      },
+    ]);
   };
 
   /* =====================
@@ -121,7 +114,9 @@ export default function TestScreen({ navigation }) {
   ====================== */
   return (
     <View style={styles.container}>
-      {loading && <ActivityIndicator size="large" color="#fff" />}
+      {loading && !refreshing && (
+        <ActivityIndicator size="large" color="#4f7cff" />
+      )}
 
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -129,11 +124,13 @@ export default function TestScreen({ navigation }) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => fetchTests(true)}
-            tintColor="#fff"
-            colors={["#ff0000"]}
+            tintColor="#4f7cff"
+            colors={["#4f7cff"]}
           />
         }
       >
+       
+
         {tests.map((testNo) => {
           const attemptedTest = attempted[testNo];
           const unlocked = isUnlocked(testNo);
@@ -143,9 +140,9 @@ export default function TestScreen({ navigation }) {
               key={testNo}
               disabled={!unlocked}
               style={[
-                styles.button,
-                attemptedTest && styles.submittedButton,
-                !unlocked && styles.lockedButton,
+                styles.card,
+                attemptedTest && styles.submittedCard,
+                !unlocked && styles.lockedCard,
               ]}
               onPress={() =>
                 attemptedTest
@@ -153,7 +150,7 @@ export default function TestScreen({ navigation }) {
                   : confirmStartTest(testNo)
               }
             >
-              <Text style={styles.btnText}>Test {testNo}</Text>
+              <Text style={styles.testTitle}>Test {testNo}</Text>
 
               {!unlocked && (
                 <Text style={styles.lockText}>🔒 Locked</Text>
@@ -161,7 +158,13 @@ export default function TestScreen({ navigation }) {
 
               {attemptedTest && (
                 <Text style={styles.scoreText}>
-                  ✓ Submitted | Score: {scores[testNo]} (Tap to Review)
+                  ✓ Submitted • Score: {scores[testNo]}
+                </Text>
+              )}
+
+              {!attemptedTest && unlocked && (
+                <Text style={styles.startText}>
+                  Tap to Start
                 </Text>
               )}
             </TouchableOpacity>
@@ -182,49 +185,57 @@ export default function TestScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
+    paddingTop: 10,
+    padding: 18,
   },
   scroll: {
-    alignItems: "center",
-    paddingBottom: 30,
+    paddingBottom: 40,
   },
-  button: {
-    width: "85%",
-    marginBottom: 15,
-    backgroundColor: "#ff0000",
-    padding: 16,
-    borderRadius: 10,
+  card: {
+    backgroundColor: "#4f7cff",
+    padding: 18,
+    borderRadius: 25,
+    marginBottom: 14,
   },
-  submittedButton: {
-    backgroundColor: "#1b8f2a",
+  submittedCard: {
+    backgroundColor: "#2ab576ff",
   },
-  lockedButton: {
-    backgroundColor: "#444",
-    opacity: 0.5,
+  lockedCard: {
+    backgroundColor: "#732323ff",
+    opacity: 0.6,
+    color: "#ffffffff",
+
   },
-  btnText: {
-    color: "#fff",
+  testTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    color: "#ffffffff",
     textAlign: "center",
   },
   scoreText: {
-    color: "#fff",
-    fontSize: 15,
-    textAlign: "center",
     marginTop: 6,
+    fontSize: 15,
+    color: "#ffffffff",
     fontWeight: "bold",
+    textAlign: "center",
+  },
+  startText: {
+    marginTop: 6,
+    fontSize: 14,
+    color: "#fcfcfcff",
+    textAlign: "center",
   },
   lockText: {
-    color: "#ccc",
-    fontSize: 14,
-    textAlign: "center",
     marginTop: 6,
+    fontSize: 14,
+    color: "#fff",
+    textAlign: "center",
   },
   emptyText: {
-    marginTop: 30,
+    marginTop: 40,
     fontSize: 16,
-    color: "#777",
+    color: "#ffffffff",
+    textAlign: "center",
   },
 });

@@ -29,10 +29,10 @@ function SlideToast({ text1, text2, bgColor }) {
 
 const toastConfig = {
   success: (props) => (
-    <SlideToast {...props} bgColor="#1b8f2a" />
+    <SlideToast {...props} bgColor="#4f7cff" />
   ),
   info: (props) => (
-    <SlideToast {...props} bgColor="#1b8f2a" />
+    <SlideToast {...props} bgColor="#4f7cff" />
   ),
   error: (props) => (
     <SlideToast {...props} bgColor="#e53935" />

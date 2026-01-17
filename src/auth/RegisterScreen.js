@@ -4,6 +4,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
@@ -71,7 +73,7 @@ export default function RegisterScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safe}>
+    <SafeAreaView style={styles.safe}>
       <Formik
         initialValues={{
           name: "",
@@ -93,53 +95,65 @@ export default function RegisterScreen({ navigation }) {
           setFieldValue,
         }) => (
           <View style={styles.container}>
-            <Text style={styles.title}>Create Account</Text>
+
+            {/* ILLUSTRATION */}
+            <Image
+              source={require("../../assets/image3.png")}
+              style={styles.image}
+              resizeMode="contain"
+            />
+
 
             {/* NAME */}
-            <TextInput
-              placeholder="Full Name"
-              placeholderTextColor="#aaa"
-              style={styles.input}
-              value={values.name}
-              onChangeText={handleChange("name")}
-              onBlur={handleBlur("name")}
-            />
+            <View style={styles.inputBox}>
+              <Ionicons name="person-outline" size={22} color="#6b7cff" />
+              <TextInput
+                placeholder="Full Name"
+                placeholderTextColor="#999"
+                style={styles.input}
+                value={values.name}
+                onChangeText={handleChange("name")}
+                onBlur={handleBlur("name")}
+              />
+            </View>
             {touched.name && errors.name && (
               <Text style={styles.error}>{errors.name}</Text>
             )}
 
             {/* EMAIL */}
-            <TextInput
-              placeholder="Email"
-              placeholderTextColor="#aaa"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-              value={values.email}
-              onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
-            />
+            <View style={styles.inputBox}>
+              <Ionicons name="mail-outline" size={22} color="#6b7cff" />
+              <TextInput
+                placeholder="Email"
+                placeholderTextColor="#999"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.input}
+                value={values.email}
+                onChangeText={handleChange("email")}
+                onBlur={handleBlur("email")}
+              />
+            </View>
             {touched.email && errors.email && (
               <Text style={styles.error}>{errors.email}</Text>
             )}
 
             {/* DOB */}
             <TouchableOpacity
-              style={styles.dobBox}
+              style={styles.inputBox}
               onPress={() => setShowDobPicker(true)}
             >
+              <Ionicons name="calendar-outline" size={22} color="#6b7cff" />
               <Text
-                style={
-                  values.dob
-                    ? styles.dobText
-                    : styles.dobPlaceholder
-                }
+                style={[
+                  styles.input,
+                  { color: values.dob ? "#000" : "#999" },
+                ]}
               >
                 {values.dob
                   ? new Date(values.dob).toDateString()
-                  : "Select Date of Birth"}
+                  : "Date of Birth"}
               </Text>
-              <Ionicons name="calendar" size={22} color="#fff" />
             </TouchableOpacity>
             {touched.dob && errors.dob && (
               <Text style={styles.error}>{errors.dob}</Text>
@@ -168,12 +182,13 @@ export default function RegisterScreen({ navigation }) {
             )}
 
             {/* PASSWORD */}
-            <View style={styles.passwordBox}>
+            <View style={styles.inputBox}>
+              <Ionicons name="lock-closed-outline" size={22} color="#6b7cff" />
               <TextInput
                 placeholder="Password"
-                placeholderTextColor="#aaa"
+                placeholderTextColor="#999"
                 secureTextEntry={!showPassword}
-                style={styles.passwordInput}
+                style={styles.input}
                 value={values.password}
                 onChangeText={handleChange("password")}
                 onBlur={handleBlur("password")}
@@ -182,9 +197,9 @@ export default function RegisterScreen({ navigation }) {
                 onPress={() => setShowPassword(!showPassword)}
               >
                 <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
                   size={22}
-                  color="#fff"
+                  color="#999"
                 />
               </TouchableOpacity>
             </View>
@@ -193,12 +208,13 @@ export default function RegisterScreen({ navigation }) {
             )}
 
             {/* CONFIRM PASSWORD */}
-            <View style={styles.passwordBox}>
+            <View style={styles.inputBox}>
+              <Ionicons name="lock-open-outline" size={22} color="#6b7cff" />
               <TextInput
                 placeholder="Confirm Password"
-                placeholderTextColor="#aaa"
+                placeholderTextColor="#999"
                 secureTextEntry={!showConfirm}
-                style={styles.passwordInput}
+                style={styles.input}
                 value={values.confirmPassword}
                 onChangeText={handleChange("confirmPassword")}
                 onBlur={handleBlur("confirmPassword")}
@@ -207,9 +223,9 @@ export default function RegisterScreen({ navigation }) {
                 onPress={() => setShowConfirm(!showConfirm)}
               >
                 <Ionicons
-                  name={showConfirm ? "eye-off" : "eye"}
+                  name={showConfirm ? "eye-off-outline" : "eye-outline"}
                   size={22}
-                  color="#fff"
+                  color="#999"
                 />
               </TouchableOpacity>
             </View>
@@ -222,13 +238,20 @@ export default function RegisterScreen({ navigation }) {
 
             {/* SUBMIT */}
             <TouchableOpacity
-              style={[styles.button, loading && styles.disabled]}
+              style={[
+                styles.button,
+                loading && styles.disabled,
+              ]}
               onPress={handleSubmit}
               disabled={loading}
             >
-              <Text style={styles.buttonText}>
-                {loading ? "Creating..." : "REGISTER"}
-              </Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>
+                  Register
+                </Text>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -247,51 +270,53 @@ export default function RegisterScreen({ navigation }) {
         STYLES
 ===================== */
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#000" },
-  container: { flex: 1, justifyContent: "center", padding: 24 },
+  safe: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  container: {
+    flex: 1,
+    padding: 24,
+  },
+  image: {
+    width: "100%",
+    height: 220,
+    marginBottom: 10,
+  },
   title: {
-    color: "#fff",
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 30,
+    color: "#000",
+    marginBottom: 20,
+  },
+  inputBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f4f6ff",
+    borderRadius: 30,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    marginBottom: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#555",
-    borderRadius: 8,
-    padding: 14,
+    flex: 1,
+    marginLeft: 12,
     fontSize: 16,
-    color: "#fff",
-    marginBottom: 4,
+    color: "#000",
   },
   error: {
     color: "#ff5252",
-    fontSize: 14,
+    fontSize: 13,
+    marginLeft: 15,
     marginBottom: 10,
   },
-  passwordBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#555",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    marginBottom: 4,
-  },
-  passwordInput: {
-    flex: 1,
-    fontSize: 16,
-    color: "#fff",
-    paddingVertical: 14,
-  },
   button: {
-    backgroundColor: "#e53935",
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: "#4f7cff",
+    paddingVertical: 16,
+    borderRadius: 30,
     marginTop: 10,
   },
-  disabled: { opacity: 0.7 },
   buttonText: {
     color: "#fff",
     fontSize: 18,
@@ -299,28 +324,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   link: {
-    color: "#4da6ff",
+    color: "#4f7cff",
     textAlign: "center",
     marginTop: 20,
     fontSize: 16,
     fontWeight: "bold",
   },
-  dobBox: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#555",
-    borderRadius: 8,
-    padding: 14,
-    marginBottom: 4,
-  },
-  dobPlaceholder: {
-    color: "#aaa",
-    fontSize: 16,
-  },
-  dobText: {
-    color: "#fff",
-    fontSize: 16,
+  disabled: {
+    opacity: 0.6,
   },
 });

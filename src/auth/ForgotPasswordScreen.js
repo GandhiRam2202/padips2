@@ -4,6 +4,8 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
@@ -11,6 +13,7 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import api from "../api/axios";
 import Toast from "react-native-toast-message";
+import { Ionicons } from "@expo/vector-icons";
 
 /* =====================
    VALIDATION SCHEMA
@@ -39,7 +42,7 @@ export default function ForgotPasswordScreen({ navigation }) {
 
       navigation.navigate("ResetPassword", {
         email: values.email,
-        otpExpiresAt: res.data.otpExpiresAt, // 🔥 backend timer
+        otpExpiresAt: res.data.otpExpiresAt,
       });
     } catch (err) {
       Toast.show({
@@ -54,7 +57,7 @@ export default function ForgotPasswordScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safe}>
+    <SafeAreaView style={styles.safe}>
       <Formik
         initialValues={{ email: "" }}
         validationSchema={ForgotSchema}
@@ -69,33 +72,69 @@ export default function ForgotPasswordScreen({ navigation }) {
           touched,
         }) => (
           <View style={styles.container}>
-            <Text style={styles.title}>Forgot Password</Text>
 
-            <TextInput
-              placeholder="Enter your email"
-              placeholderTextColor="#aaa"
-              style={styles.input}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              editable={!loading}
-              value={values.email}
-              onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
+            {/* ILLUSTRATION */}
+            <Image
+              source={require("../../assets/image1.png")}
+              style={styles.image}
+              resizeMode="contain"
             />
+
+          
+            <Text style={styles.subtitle}>
+              Enter your registered email to receive OTP
+            </Text>
+
+            {/* EMAIL INPUT */}
+            <View style={styles.inputBox}>
+              <Ionicons
+                name="mail-outline"
+                size={22}
+                color="#6b7cff"
+              />
+              <TextInput
+                placeholder="Email"
+                placeholderTextColor="#999"
+                style={styles.input}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                editable={!loading}
+                value={values.email}
+                onChangeText={handleChange("email")}
+                onBlur={handleBlur("email")}
+              />
+            </View>
 
             {touched.email && errors.email && (
               <Text style={styles.error}>{errors.email}</Text>
             )}
 
+            {/* BUTTON */}
             <TouchableOpacity
-              style={[styles.button, loading && styles.disabled]}
+              style={[
+                styles.button,
+                loading && styles.disabled,
+              ]}
               onPress={handleSubmit}
               disabled={loading}
             >
-              <Text style={styles.buttonText}>
-                {loading ? "Sending..." : "SEND OTP"}
-              </Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Send OTP</Text>
+              )}
             </TouchableOpacity>
+
+            {/* BACK TO LOGIN */}
+            {!loading && (
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+              >
+                <Text style={styles.back}>
+                  Back to Login
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </Formik>
@@ -107,39 +146,72 @@ export default function ForgotPasswordScreen({ navigation }) {
         STYLES
 ===================== */
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#000" },
-  container: { flex: 1, justifyContent: "center", padding: 24 },
+  safe: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  container: {
+    flex: 1,
+    paddingTop:100,
+    padding: 24,
+  },
+  image: {
+    width: "100%",
+    height: 220,
+    marginBottom: 10,
+  },
   title: {
-    color: "#fff",
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 25,
+    color: "#000",
+    marginBottom: 6,
+  },
+  subtitle: {
+    textAlign: "center",
+    color: "#666",
+    marginBottom: 30,
+  },
+  inputBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f4f6ff",
+    borderRadius: 30,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    marginBottom: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#555",
-    borderRadius: 8,
-    padding: 14,
+    flex: 1,
+    marginLeft: 12,
     fontSize: 16,
-    color: "#fff",
-    marginBottom: 6,
+    color: "#000",
   },
   error: {
     color: "#ff5252",
+    fontSize: 13,
+    marginLeft: 15,
     marginBottom: 12,
-    fontSize: 14,
   },
   button: {
-    backgroundColor: "#e53935",
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: "#4f7cff",
+    paddingVertical: 16,
+    borderRadius: 30,
+    marginTop: 10,
   },
-  disabled: { opacity: 0.7 },
   buttonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  back: {
+    textAlign: "center",
+    marginTop: 25,
+    color: "#4f7cff",
+    fontWeight: "bold",
+  },
+  disabled: {
+    opacity: 0.6,
   },
 });

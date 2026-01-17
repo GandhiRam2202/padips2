@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useContext, useState } from "react";
@@ -36,54 +37,42 @@ export default function LoginScreen({ navigation }) {
       SUBMIT HANDLER
   ======================= */
   const submit = async (values) => {
-  if (loading) return;
+    if (loading) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await api.post("/login", values);
-  
+      const res = await api.post("/login", values);
 
-    // ❌ Invalid response guard
-    if (!res?.data?.token || !res?.data?.user) {
+      if (!res?.data?.token || !res?.data?.user) {
+        Toast.show({
+          type: "error",
+          text1: "Invalid login response",
+        });
+        return;
+      }
+
+      Toast.show({
+        type: "success",
+        text1: "Login successful",
+      });
+
+      await login(res.data.token, res.data.user);
+    } catch (err) {
       Toast.show({
         type: "error",
-        text1: "Invalid login response",
+        text1:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Login failed",
       });
-      return; // ✅ IMPORTANT
+    } finally {
+      setLoading(false);
     }
-
-    // ✅ Success
-    Toast.show({
-      type: "success",
-      text1: "Login successful",
-    });
-
-    // 🔥 MUST pass BOTH
-    await login(res.data.token, res.data.user);
-  
-    
-
-  } catch (err) {
-    
-
-    Toast.show({
-      type: "error",
-      text1:
-        err?.response?.data?.message ||
-        err?.message ||
-        "Login failed",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
+  };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safe}>
+    <SafeAreaView style={styles.safe}>
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={LoginSchema}
@@ -99,30 +88,40 @@ export default function LoginScreen({ navigation }) {
           isValid,
         }) => (
           <View style={styles.container}>
-            <Text style={styles.title}>Login</Text>
+
+            {/* ILLUSTRATION */}
+            <Image
+              source={require("../../assets/image.png")}
+              style={styles.image}
+              resizeMode="contain"
+            />
 
             {/* EMAIL */}
-            <TextInput
-              placeholder="Email"
-              placeholderTextColor="#aaa"
-              style={styles.input}
-              autoCapitalize="none"
-              editable={!loading}
-              value={values.email}
-              onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
-            />
+            <View style={styles.inputBox}>
+              <Ionicons name="mail-outline" size={22} color="#6b7cff" />
+              <TextInput
+                placeholder="Email"
+                placeholderTextColor="#999"
+                style={styles.input}
+                autoCapitalize="none"
+                editable={!loading}
+                value={values.email}
+                onChangeText={handleChange("email")}
+                onBlur={handleBlur("email")}
+              />
+            </View>
             {touched.email && errors.email && (
               <Text style={styles.error}>{errors.email}</Text>
             )}
 
             {/* PASSWORD */}
-            <View style={styles.passwordBox}>
+            <View style={styles.inputBox}>
+              <Ionicons name="lock-closed-outline" size={22} color="#6b7cff" />
               <TextInput
                 placeholder="Password"
-                placeholderTextColor="#aaa"
+                placeholderTextColor="#999"
                 secureTextEntry={!showPassword}
-                style={styles.passwordInput}
+                style={styles.input}
                 editable={!loading}
                 value={values.password}
                 onChangeText={handleChange("password")}
@@ -133,15 +132,22 @@ export default function LoginScreen({ navigation }) {
                 disabled={loading}
               >
                 <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
                   size={22}
-                  color="#fff"
+                  color="#999"
                 />
               </TouchableOpacity>
             </View>
             {touched.password && errors.password && (
               <Text style={styles.error}>{errors.password}</Text>
             )}
+
+            {/* FORGOT PASSWORD */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ForgotPassword")}
+            >
+              <Text style={styles.forgot}>Forgot Password?</Text>
+            </TouchableOpacity>
 
             {/* LOGIN BUTTON */}
             <TouchableOpacity
@@ -155,25 +161,19 @@ export default function LoginScreen({ navigation }) {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>LOGIN</Text>
+                <Text style={styles.buttonText}>Log In</Text>
               )}
             </TouchableOpacity>
 
-            {/* LINKS */}
+            {/* REGISTER */}
             {!loading && (
-              <>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("ForgotPassword")}
-                >
-                  <Text style={styles.link}>Forgot Password?</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("Register")}
-                >
-                  <Text style={styles.link}>New user? Register</Text>
-                </TouchableOpacity>
-              </>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Register")}
+              >
+                <Text style={styles.register}>
+                  New user? <Text style={styles.registerBold}>Register</Text>
+                </Text>
+              </TouchableOpacity>
             )}
           </View>
         )}
@@ -188,53 +188,49 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
   },
   container: {
     flex: 1,
-    justifyContent: "center",
     padding: 24,
+    paddingTop: 100,
   },
-  title: {
-    color: "#fff",
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
+  image: {
+    width: "100%",
+    height: 260,
     marginBottom: 30,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#555",
-    borderRadius: 8,
-    padding: 14,
-    fontSize: 16,
-    color: "#fff",
-    marginBottom: 5,
-  },
-  passwordBox: {
+  inputBox: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#555",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    marginBottom: 5,
-  },
-  passwordInput: {
-    flex: 1,
-    fontSize: 16,
-    color: "#fff",
+    backgroundColor: "#f4f6ff",
+    borderRadius: 30,
+    paddingHorizontal: 18,
     paddingVertical: 14,
+    marginBottom: 8,
+  },
+  input: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    color: "#000",
   },
   error: {
     color: "#ff5252",
-    fontSize: 14,
+    fontSize: 13,
+    marginLeft: 15,
     marginBottom: 10,
   },
+  forgot: {
+    textAlign: "right",
+    color: "#6b7cff",
+    marginVertical: 15,
+    fontWeight: "500",
+  },
   button: {
-    backgroundColor: "#e53935",
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: "#4f7cff",
+    paddingVertical: 16,
+    borderRadius: 30,
     marginTop: 10,
   },
   buttonText: {
@@ -243,11 +239,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-  link: {
-    color: "#4da6ff",
+  register: {
     textAlign: "center",
-    marginTop: 20,
-    fontSize: 16,
+    marginTop: 25,
+    color: "#555",
+  },
+  registerBold: {
+    color: "#4f7cff",
     fontWeight: "bold",
   },
   disabled: {

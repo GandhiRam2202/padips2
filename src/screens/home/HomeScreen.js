@@ -46,40 +46,43 @@ export default function HomeScreen({ navigation }) {
   ====================== */
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.testBtn}
+      style={styles.testCard}
       onPress={() =>
         navigation.navigate("LearnQuestions", { test: item })
       }
     >
-      <Text style={styles.btnText}>Q & A - {item}</Text>
+      <Text style={styles.testTitle}>Test {item}</Text>
+      <Text style={styles.testSub}>Q & A</Text>
     </TouchableOpacity>
   );
 
   if (loading && !refreshing) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color="#4f7cff" />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+
       <FlatList
         data={tests}
         keyExtractor={(item) => item.toString()}
         renderItem={renderItem}
-        numColumns={3}
+        numColumns={3}                 // 👈 3 columns
         columnWrapperStyle={styles.row}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#ff0000"]}   // Android
-            tintColor="#fff"       // iOS
+            colors={["#4f7cff"]}   // Android
+            tintColor="#4f7cff"    // iOS
           />
         }
       />
+
     </View>
   );
 }
@@ -90,30 +93,43 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
-    padding: 10,
+    backgroundColor: "#fff",
+    padding: 16,
   },
   center: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },
+  header: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#000",
+    marginBottom: 16,
+    textAlign: "center",
+  },
   row: {
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  testBtn: {
-    backgroundColor: "#ff0000",
+  testCard: {
     flex: 1,
-    marginHorizontal: 4,
-    paddingVertical: 18,
-    borderRadius: 10,
+    backgroundColor: "#4f7cff",
+    marginHorizontal: 6,
+    paddingVertical: 26,
+    borderRadius: 25,
     alignItems: "center",
+    justifyContent: "center",
   },
-  btnText: {
-    color: "#fff",
-    fontSize: 16,
+  testTitle: {
+    fontSize: 18,
     fontWeight: "bold",
+    color: "#fff",
+  },
+  testSub: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#fff",
   },
 });

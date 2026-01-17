@@ -6,10 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import Toast from "react-native-toast-message";
-
-
 import { getUser } from "../../utils/storage";
 import api from "../../api/axios";
 
@@ -71,12 +70,10 @@ export default function FeedbackScreen({ navigation }) {
 
       setFeedback("");
 
-      // 🔙 Go back to previous screen / Home
       setTimeout(() => {
         navigation.goBack();
       }, 800);
-
-    } catch (err) {
+    } catch {
       Toast.show({
         type: "error",
         text1: "Submission failed",
@@ -92,25 +89,39 @@ export default function FeedbackScreen({ navigation }) {
   ====================== */
   return (
     <View style={styles.container}>
-      <TextInput
-        style={[styles.input, styles.feedbackInput]}
-        placeholder="Write your feedback here..."
-        placeholderTextColor="#888"
-        multiline
-        value={feedback}
-        onChangeText={setFeedback}
-        editable={!loading}
+
+      <Image
+        source={require("../../../assets/image4.png")}
+        style={styles.image}
+        resizeMode="contain"
       />
 
+      <View style={styles.card}>
+        <TextInput
+          style={styles.feedbackInput}
+          placeholder="Write your feedback here..."
+          placeholderTextColor="#ffffffff"
+          multiline
+          value={feedback}
+          onChangeText={setFeedback}
+          editable={!loading}
+        />
+      </View>
+
       <TouchableOpacity
-        style={[styles.button, loading && styles.disabledButton]}
+        style={[
+          styles.button,
+          loading && styles.disabledButton,
+        ]}
         onPress={submitFeedback}
         disabled={loading}
       >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Submit</Text>
+          <Text style={styles.buttonText}>
+            Submit Feedback
+          </Text>
         )}
       </TouchableOpacity>
     </View>
@@ -124,27 +135,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
   },
-  input: {
-    borderWidth: 2,
-    borderColor: "#fff",
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 18,
-    marginBottom: 15,
-    color: "#fff",
+  title: {
+    fontSize: 26,
     fontWeight: "bold",
+    color: "#000",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  subtitle: {
+    textAlign: "center",
+    color: "#666",
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: "#7e8bc3ff",
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 20,
   },
   feedbackInput: {
+    fontWeight: "bold",
     height: 150,
+    fontSize: 16,
+    color: "#ffffffff",
     textAlignVertical: "top",
   },
   button: {
-    marginTop: 10,
-    backgroundColor: "#e53935",
-    padding: 15,
-    borderRadius: 8,
+    backgroundColor: "#4f7cff",
+    paddingVertical: 16,
+    borderRadius: 30,
     alignItems: "center",
   },
   buttonText: {
@@ -154,5 +175,10 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
+  },
+    image: {
+    width: "100%",
+    height: 320,
+    marginBottom: 10,
   },
 });

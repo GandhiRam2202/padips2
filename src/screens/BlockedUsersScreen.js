@@ -102,7 +102,6 @@ export default function BlockedUsersScreen() {
         { text: "Cancel", style: "cancel" },
         {
           text: "Activate",
-          style: "default",
           onPress: () => activateUser(userId),
         },
       ]
@@ -130,12 +129,14 @@ export default function BlockedUsersScreen() {
 
     return (
       <View style={styles.card}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.email}>{item.email}</Text>
+        <View style={styles.header}>
+          <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.status}>
+            {item.isBlocked ? "Blocked" : "Suspended"}
+          </Text>
+        </View>
 
-        <Text style={styles.status}>
-          {item.isBlocked ? "Blocked" : "Suspended"}
-        </Text>
+        <Text style={styles.email}>{item.email}</Text>
 
         {item.suspendReason && (
           <Text style={styles.reason}>
@@ -161,17 +162,17 @@ export default function BlockedUsersScreen() {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color="#4f7cff" />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-
+      {/* SEARCH */}
       <TextInput
         placeholder="Search by email"
-        placeholderTextColor="#aaa"
+        placeholderTextColor="#999"
         value={search}
         onChangeText={handleSearch}
         style={styles.search}
@@ -186,13 +187,14 @@ export default function BlockedUsersScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#fff"
-            colors={["#4caf50"]}
+            tintColor="#4f7cff"
+            colors={["#4f7cff"]}
           />
         }
         ListEmptyComponent={
           <Text style={styles.empty}>No blocked users</Text>
         }
+        contentContainerStyle={{ paddingBottom: 30 }}
       />
     </View>
   );
@@ -204,68 +206,85 @@ export default function BlockedUsersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
-    paddingTop: 5,
-    padding:20,
+    backgroundColor: "#fff",
+    padding: 16,
   },
-  search: {
-    backgroundColor: "#111",
-    borderRadius: 8,
-    color: "#fff",
-    borderWidth: 1,
-    borderColor: "#333",
-    marginBottom: 12,
-  },
-  card: {
-    backgroundColor: "#111",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#e53935",
-  },
-  name: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  email: {
-    color: "#aaa",
-    marginBottom: 5,
-  },
-  status: {
-    color: "#e53935",
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  reason: {
-    color: "#ffa726",
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  activateBtn: {
-    backgroundColor: "#4caf50",
-    padding: 10,
-    borderRadius: 6,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  activateText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  disabled: {
-    opacity: 0.6,
-  },
+
   loader: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },
+
+  search: {
+    backgroundColor: "#00c3ff73",
+    borderRadius: 30,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    color: "#000000ff",
+    marginBottom: 14,
+    fontWeight:"bold",
+  },
+  
+  card: {
+    backgroundColor: "#bcd5daff",
+    borderRadius: 20,
+    padding: 10,
+    marginBottom: 14,
+  },
+  
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  
+  name: {
+    color: "#000",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  
+  email: {
+    color: "#666",
+    fontSize: 18,
+    fontWeight:"bold",
+    marginBottom: 6,
+  },
+
+  status: {
+    color: "#e53935",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+
+  reason: {
+    color: "#ff0000ff",
+    fontSize: 18,
+    marginBottom: 10,
+    fontWeight: "bold",
+  },
+
+  activateBtn: {
+    backgroundColor: "#2e7d32",
+    paddingVertical: 12,
+    borderRadius: 30,
+    alignItems: "center",
+  },
+
+  activateText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15,
+  },
+
+  disabled: {
+    opacity: 0.6,
+  },
+
   empty: {
-    color: "#aaa",
+    color: "#777",
     textAlign: "center",
-    marginTop: 50,
+    marginTop: 40,
   },
 });

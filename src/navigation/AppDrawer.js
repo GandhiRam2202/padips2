@@ -1,17 +1,20 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
+import { useContext, useEffect, useState } from "react";
+import { Alert } from "react-native";
+
 import TestStack from "./TestStack";
+import HomeStack from "./HomeStack";
+
 import AdminScreen from "../screens/AdminScreen";
 import BlockedUsersScreen from "../screens/BlockedUsersScreen";
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../auth/AuthContext";
-import { getUser } from "../utils/storage";
-import { Alert } from "react-native";
-import HomeStack from "./HomeStack";
 import LeaderBoardScreen from "../screens/home/LeaderBoardScreen";
 import FeedbackScreen from "../screens/home/FeedbackScreen";
 import DeveloperProfile from "../screens/home/DeveloperProfile";
 import ProfileScreen from "../screens/home/ProfileScreen";
 import WishesChatScreen from "../screens/WishesChatScreen";
+
+import { AuthContext } from "../auth/AuthContext";
+import { getUser } from "../utils/storage";
 
 const Drawer = createDrawerNavigator();
 
@@ -39,32 +42,44 @@ export default function AppDrawer() {
     return (
         <Drawer.Navigator
             screenOptions={{
-                headerStyle: { backgroundColor: "#000" },
-                headerTintColor: "#f7bd00ff",
+                headerStyle: {
+                    backgroundColor: "#ffffffff",
+                },
+                headerTintColor: "#000000ff",
 
+                /* DRAWER PANEL */
                 drawerStyle: {
-                    backgroundColor: "rgba(0,0,0,0.75)",
-                    width: "45%",
-                    paddingTop: 50,
+                    backgroundColor: "rgba(255, 255, 255, 0.55)",
+                    width: "65%",
+                    paddingTop: 40,
+                    width: "50%"
                 },
 
-                // ✅ DRAWER TEXT COLOR
-                drawerActiveTintColor: "#ffffff",     // selected item text
-                drawerInactiveTintColor: "#ffffff",   // normal item text
+                /* DRAWER TEXT */
+                drawerActiveTintColor: "#ffffffff",
+                drawerInactiveTintColor: "#000000ff",
 
-                // ✅ OPTIONAL: make text bold & centered
                 drawerLabelStyle: {
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: "bold",
-                    textAlign: "center",
+                    textAlign: "center"
                 },
+
+                drawerItemStyle: {
+                    borderRadius: 12,
+                    marginHorizontal: 10,
+                    marginVertical: 4,
+                },
+
+                drawerActiveBackgroundColor: "#4f7cff",
             }}
         >
-
+            {/* HOME */}
             <Drawer.Screen
-                name="Home"
+                name="🏠 Home"
                 component={HomeStack}
                 options={{
+                    title: "🏠 Home",
                     headerShown: true,
                     headerTitleStyle: {
                         fontWeight: "bold",
@@ -72,87 +87,74 @@ export default function AppDrawer() {
                     },
                 }}
             />
+
+            {/* TESTS */}
             <Drawer.Screen
                 name="Tests"
                 component={TestStack}
                 options={{
+                    title: "📝 Tests",
                     headerShown: false,
-                    title: "Tests",
                 }}
             />
+
+            {/* LEADERBOARD */}
             <Drawer.Screen
                 name="LeaderBoard"
                 component={LeaderBoardScreen}
                 options={{
-                    headerShown: true,
-                    title: "🏆 Leader Board 🏆",
-                    headerStyle: {
-                        backgroundColor: "#000",
-                    },
-                    headerTintColor: "#f7bd00ff", // title + back icon color
-                    headerTitleAlign: "center",
+                    title: "🏆 Leader Board",
                     headerTitleStyle: {
                         fontWeight: "bold",
                         fontSize: 22,
                     },
                 }}
             />
+
+            {/* PROFILE */}
             <Drawer.Screen
                 name="Profile"
                 component={ProfileScreen}
                 options={{
-                    headerShown: true,
-                    title: "Profile",
-                    headerStyle: {
-                        backgroundColor: "#000",
-                    },
-                    headerTintColor: "#f7bd00ff", // title + back icon color
-                    headerTitleAlign: "center",
+                    title: "👤 Profile",
                     headerTitleStyle: {
                         fontWeight: "bold",
                         fontSize: 22,
                     },
                 }}
             />
+
+            {/* WISHES */}
             <Drawer.Screen
                 name="Wishes"
                 component={WishesChatScreen}
                 options={{
                     title: "🎉 Wishes",
-                    headerStyle: { backgroundColor: "#000" },
-                    headerTintColor: "#FFD700",
-                    headerTitleStyle: { fontWeight: "bold" },
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                    },
                 }}
             />
 
+            {/* FEEDBACK */}
             <Drawer.Screen
                 name="Feedback"
                 component={FeedbackScreen}
                 options={{
-                    headerShown: true,
                     title: "💬 Feedback",
-                    headerStyle: {
-                        backgroundColor: "#000",
-                    },
-                    headerTintColor: "#f7bd00ff", // title + back icon color
-                    headerTitleAlign: "center",
                     headerTitleStyle: {
                         fontWeight: "bold",
                         fontSize: 22,
                     },
                 }}
             />
+
+            {/* DEVELOPER */}
             <Drawer.Screen
                 name="Developer"
                 component={DeveloperProfile}
                 options={{
-                    headerShown: true,
-                    title: "Developer",
-                    headerStyle: {
-                        backgroundColor: "#000",
-                    },
-                    headerTintColor: "#f7bd00ff", // title + back icon color
-                    headerTitleAlign: "center",
+                    title: "👨‍💻 Developer",
                     headerTitleStyle: {
                         fontWeight: "bold",
                         fontSize: 22,
@@ -160,19 +162,43 @@ export default function AppDrawer() {
                 }}
             />
 
+            {/* ADMIN (ROLE BASED) */}
             {user.role === "admin" && (
-                <Drawer.Screen name="AdminPanel" component={AdminScreen} />
+                <Drawer.Screen
+                    name="AdminPanel"
+                    component={AdminScreen}
+                    options={{
+                        title: "🛠 Admin Panel",
+                        headerTitleStyle: {
+                            fontWeight: "bold",
+                            fontSize: 22,
+                        }
+
+                    }}
+                />
             )}
 
+            {/* HIDDEN ROUTES */}
             <Drawer.Screen
                 name="BlockedUsers"
                 component={BlockedUsersScreen}
-                options={{ drawerItemStyle: { display: "none" } }}
+                options={{
+                    drawerItemStyle: { display: "none" },
+                    title: "📵 Blocked User",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                        fontSize: 22,
+                    }
+                }}
             />
 
+            {/* LOGOUT */}
             <Drawer.Screen
                 name="Logout"
                 component={EmptyScreen}
+                options={{
+                    title: "🚪 Logout",
+                }}
                 listeners={{
                     drawerItemPress: (e) => {
                         e.preventDefault();

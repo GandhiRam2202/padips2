@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import api from "../../api/axios";
 
-
 export default function LeaderBoardScreen() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +17,6 @@ export default function LeaderBoardScreen() {
   /* ================= FETCH LEADERBOARD ================= */
   const fetchLeaderboard = async () => {
     try {
-
       const res = await api.get("/tests/leaderboard");
 
       if (res.data?.success) {
@@ -54,17 +52,22 @@ export default function LeaderBoardScreen() {
 
   /* ================= RENDER ITEM ================= */
   const renderItem = ({ item, index }) => (
-    <View style={styles.row}>
-      <Text style={styles.rank}>{getRankBadge(index)}</Text>
+    <View style={styles.card}>
+      <View style={styles.rankBox}>
+        <Text style={styles.rank}>{getRankBadge(index)}</Text>
+      </View>
 
       <View style={styles.userBox}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.sub}>
-          Tests: {item.tests} | Total: {item.totalScore}
+          Tests: {item.tests} • Total: {item.totalScore}
         </Text>
       </View>
 
-      <Text style={styles.avg}>{item.avgScore}</Text>
+      <View style={styles.scoreBox}>
+        <Text style={styles.avg}>{item.avgScore}</Text>
+        <Text style={styles.avgLabel}>AVG</Text>
+      </View>
     </View>
   );
 
@@ -72,7 +75,7 @@ export default function LeaderBoardScreen() {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#FFD700" />
+        <ActivityIndicator size="large" color="#4f7cff" />
       </View>
     );
   }
@@ -89,75 +92,91 @@ export default function LeaderBoardScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#ff0000"]}
-            tintColor="#ff0000"
+            colors={["#4f7cff"]}
+            tintColor="#4f7cff"
           />
         }
         ListEmptyComponent={
           <Text style={styles.empty}>No leaderboard data</Text>
         }
+        contentContainerStyle={{ paddingBottom: 30 }}
       />
     </View>
   );
 }
 
-
+/* ================= STYLES ================= */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
-    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+    paddingTop: 10,
+    padding: 20,
   },
-  row: {
+  header: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#000",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  card: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1a1a1a",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 12,
+    backgroundColor: "#4f7cff",
+    padding: 16,
+    borderRadius: 25,
+    marginBottom: 14,
   },
-
-  rank: {
-    width: 50,
-    textAlign: "center",
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#FFD700",
-  },
-
-  userBox: {
-    flex: 1,
-    alignItems: "center",
-  },
-
-  name: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-
-  sub: {
-    color: "#aaa",
-    fontSize: 14,
-    marginTop: 2,
-  },
-
-  avg: {
-    color: "#00e676",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-
-  loader: {
-    flex: 1,
+  rankBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#200303ff",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
+    marginRight: 12,
   },
-
+  rank: {
+    fontSize: 34,
+    fontWeight: "bold",
+    color: "#ffffffff",
+  },
+  userBox: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#ffffffff",
+  },
+  sub: {
+    fontSize: 14,
+    color: "#ffffffff",
+    marginTop: 2,
+  },
+  scoreBox: {
+    alignItems: "center",
+  },
+  avg: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#ffffffff",
+  },
+  avgLabel: {
+    fontSize: 12,
+    color: "#ffffffff",
+  },
+  loader: {
+    flex: 1,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   empty: {
-    color: "#777",
+    color: "#ffffffff",
     textAlign: "center",
     marginTop: 40,
+    fontSize: 16,
   },
 });

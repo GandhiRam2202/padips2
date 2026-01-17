@@ -16,16 +16,18 @@ export default function TestStack() {
                 component={TestScreen}
                 options={({ navigation }) => ({
                     headerShown: true,
-                    title: "Tests",
-                    headerStyle: { backgroundColor: "#000" },
-                    headerTintColor: "#f7bd00ff",
-                    headerTitleAlign: "center",
-                    
+                    title: "📝 Tests",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                        fontSize: 22,
+                    },
+                    headerTintColor: "#000000ff",
+
                     headerLeft: () => (
                         <TouchableOpacity
                             onPress={() => navigation.openDrawer()}
                         >
-                            <Ionicons name="menu" size={26} color="#f7bd00ff" />
+                            <Ionicons name="menu" size={26} color="#000000ff" />
                         </TouchableOpacity>
                     ),
                 })}
@@ -37,10 +39,12 @@ export default function TestStack() {
                 component={TestQuestionScreen}
                 options={{
                     headerShown: true,
-                    title: "Test Questions",
-                    headerStyle: { backgroundColor: "#000" },
-                    headerTintColor: "#fff",
-                    headerTitleAlign: "center",
+                    title: "📝 Test Questions",
+                    headerTitleStyle: {
+                        fontWeight: "bold",
+                        fontSize: 22,
+                    },
+                    headerTintColor: "#000000ff",
                     headerBackVisible: true,
                 }}
             />

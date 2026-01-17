@@ -1,8 +1,8 @@
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
+  TouchableOpacity,
   FlatList,
   ActivityIndicator,
 } from "react-native";
@@ -19,7 +19,6 @@ export default function AdminScreen() {
   const [actionLoading, setActionLoading] = useState(null);
   const [search, setSearch] = useState("");
 
-  // 🔴 Suspend Modal State
   const [showSuspend, setShowSuspend] = useState(false);
   const [reason, setReason] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
@@ -97,22 +96,24 @@ export default function AdminScreen() {
       item.isBlocked
         ? "#e53935"
         : item.status === "active"
-        ? "#4caf50"
+        ? "#2e7d32"
         : "#ffa726";
 
     const isBusy = actionLoading === item._id;
 
     return (
       <View style={styles.card}>
-        <Text style={styles.name}>{item.name}</Text>
+        <View style={styles.cardHeader}>
+          <Text style={styles.name}>{item.name}</Text>
+          <Text style={[styles.status, { color: statusColor }]}>
+            {item.isBlocked ? "Blocked" : item.status}
+          </Text>
+        </View>
+
         <Text style={styles.email}>{item.email}</Text>
 
-        <Text style={[styles.status, { color: statusColor }]}>
-          {item.isBlocked ? "Blocked" : item.status}
-        </Text>
-
         <TouchableOpacity
-          style={[styles.suspend, isBusy && styles.disabled]}
+          style={[styles.suspendBtn, isBusy && styles.disabled]}
           onPress={() => {
             setSelectedUser(item._id);
             setReason("");
@@ -124,7 +125,11 @@ export default function AdminScreen() {
         </TouchableOpacity>
 
         {isBusy && (
-          <ActivityIndicator size="small" color="#fff" style={{ marginTop: 10 }} />
+          <ActivityIndicator
+            size="small"
+            color="#4f7cff"
+            style={{ marginTop: 8 }}
+          />
         )}
       </View>
     );
@@ -136,7 +141,7 @@ export default function AdminScreen() {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color="#4f7cff" />
       </View>
     );
   }
@@ -146,13 +151,14 @@ export default function AdminScreen() {
       {/* SEARCH */}
       <TextInput
         placeholder="Search by email"
-        placeholderTextColor="#aaa"
+        placeholderTextColor="#999"
         value={search}
         onChangeText={setSearch}
         style={styles.search}
         autoCapitalize="none"
       />
 
+      {/* BLOCKED USERS */}
       <TouchableOpacity
         style={styles.blockedBtn}
         onPress={() => navigation.navigate("BlockedUsers")}
@@ -182,7 +188,7 @@ export default function AdminScreen() {
 
             <TextInput
               placeholder="Enter suspend reason"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#999"
               value={reason}
               onChangeText={setReason}
               style={styles.modalInput}
@@ -200,7 +206,7 @@ export default function AdminScreen() {
                 style={styles.okBtn}
                 onPress={handleSuspend}
               >
-                <Text style={styles.btnText}>OK</Text>
+                <Text style={styles.btnText}>Suspend</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -216,79 +222,32 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
-    padding: 20,
-  },
-
-  card: {
-    backgroundColor: "#111",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 12,
-  },
-
-  name: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-
-  email: {
-    color: "#aaa",
-    marginBottom: 5,
-  },
-
-  status: {
-    fontWeight: "bold",
-    marginBottom: 10,
-    textTransform: "capitalize",
-  },
-
-  suspend: {
-    backgroundColor: "#ffa726",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-  },
-
-  actionText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-
-  disabled: {
-    opacity: 0.5,
+    backgroundColor: "#fff",
+    padding: 16,
   },
 
   loader: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },
 
-  empty: {
-    color: "#aaa",
-    textAlign: "center",
-    marginTop: 50,
-  },
-
   search: {
-    backgroundColor: "#111",
-    borderRadius: 8,
-    padding: 12,
-    color: "#fff",
-    borderWidth: 1,
-    borderColor: "#333",
-    marginBottom: 15,
+    backgroundColor: "#00c3ff73",
+    borderRadius: 30,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    color: "#000000ff",
+    marginBottom: 14,
+    fontWeight:"bold",
   },
 
   blockedBtn: {
     backgroundColor: "#e53935",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
+    paddingVertical: 14,
+    borderRadius: 30,
+    marginBottom: 16,
   },
 
   blockedText: {
@@ -298,6 +257,60 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+  card: {
+    backgroundColor: "#bcd5daff",
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 14,
+  },
+
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+
+  name: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  
+  email: {
+    color: "#666",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+
+  status: {
+    fontWeight: "bold",
+    textTransform: "capitalize",
+  },
+
+  suspendBtn: {
+    backgroundColor: "#ffa726",
+    paddingVertical: 12,
+    borderRadius: 30,
+    alignItems: "center",
+    marginTop: 6,
+  },
+
+  actionText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  empty: {
+    color: "#777",
+    textAlign: "center",
+    marginTop: 40,
+  },
+
+  disabled: {
+    opacity: 0.6,
+  },
+
   /* MODAL */
   overlay: {
     position: "absolute",
@@ -305,33 +318,32 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
 
   modal: {
     width: "85%",
-    backgroundColor: "#111",
-    borderRadius: 10,
+    backgroundColor: "#fff",
+    borderRadius: 20,
     padding: 20,
   },
 
   modalTitle: {
-    color: "#fff",
-    fontSize: 18,
+    color: "#000",
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
 
   modalInput: {
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 8,
-    padding: 12,
-    color: "#fff",
-    marginBottom: 15,
+    backgroundColor: "#f4f6ff",
+    borderRadius: 14,
+    padding: 14,
+    color: "#000",
+    marginBottom: 16,
   },
 
   modalActions: {
@@ -341,19 +353,19 @@ const styles = StyleSheet.create({
 
   cancelBtn: {
     flex: 1,
-    backgroundColor: "#555",
-    padding: 12,
-    borderRadius: 8,
-    marginRight: 5,
+    backgroundColor: "#ccc",
+    paddingVertical: 14,
+    borderRadius: 30,
+    marginRight: 6,
     alignItems: "center",
   },
 
   okBtn: {
     flex: 1,
     backgroundColor: "#e53935",
-    padding: 12,
-    borderRadius: 8,
-    marginLeft: 5,
+    paddingVertical: 14,
+    borderRadius: 30,
+    marginLeft: 6,
     alignItems: "center",
   },
 

@@ -21,7 +21,7 @@ export default function App() {
         />
       </AuthProvider>
 
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
     </GestureHandlerRootView>
   );
 }
