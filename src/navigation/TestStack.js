@@ -25,7 +25,7 @@ export default function TestStack() {
 
                     headerLeft: () => (
                         <TouchableOpacity
-                            onPress={() => navigation.openDrawer()}
+                            onPress={() => navigation.getParent()?.openDrawer()}
                         >
                             <Ionicons name="menu" size={26} color="#000000ff" />
                         </TouchableOpacity>

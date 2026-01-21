@@ -81,6 +81,10 @@ export default function DeveloperProfile() {
           </TouchableOpacity>
         </View>
       </View>
+         <Image
+          source={require("../../../assets/rava.png")}
+          style={styles.rava}
+        />
     </View>
   );
 }
@@ -137,6 +141,11 @@ textBox: {
     width: 180,
     height: 180,
     borderRadius: 90,
+    marginBottom: 12,
+  },
+  rava: {
+    width: 480,
+    height: 480,
     marginBottom: 12,
   },
   name: {
