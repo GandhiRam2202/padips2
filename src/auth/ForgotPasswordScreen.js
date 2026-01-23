@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   TextInput,
@@ -6,9 +7,13 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import api from "../api/axios";
@@ -47,9 +52,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     } catch (err) {
       Toast.show({
         type: "error",
-        text1:
-          err?.response?.data?.message ||
-          "Failed to send OTP",
+        text1: err?.response?.data?.message || "Failed to send OTP",
       });
     } finally {
       setLoading(false);
@@ -58,86 +61,88 @@ export default function ForgotPasswordScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Formik
-        initialValues={{ email: "" }}
-        validationSchema={ForgotSchema}
-        onSubmit={sendOtp}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-        }) => (
-          <View style={styles.container}>
-
-            {/* ILLUSTRATION */}
-            <Image
-              source={require("../../assets/image1.png")}
-              style={styles.image}
-              resizeMode="contain"
-            />
-
-          
-            <Text style={styles.subtitle}>
-              Enter your registered email to receive OTP
-            </Text>
-
-            {/* EMAIL INPUT */}
-            <View style={styles.inputBox}>
-              <Ionicons
-                name="mail-outline"
-                size={22}
-                color="#6b7cff"
-              />
-              <TextInput
-                placeholder="Email"
-                placeholderTextColor="#999"
-                style={styles.input}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                editable={!loading}
-                value={values.email}
-                onChangeText={handleChange("email")}
-                onBlur={handleBlur("email")}
-              />
-            </View>
-
-            {touched.email && errors.email && (
-              <Text style={styles.error}>{errors.email}</Text>
-            )}
-
-            {/* BUTTON */}
-            <TouchableOpacity
-              style={[
-                styles.button,
-                loading && styles.disabled,
-              ]}
-              onPress={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Send OTP</Text>
-              )}
-            </TouchableOpacity>
-
-            {/* BACK TO LOGIN */}
-            {!loading && (
-              <TouchableOpacity
-                onPress={() => navigation.goBack()}
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+              <Formik
+                initialValues={{ email: "" }}
+                validationSchema={ForgotSchema}
+                onSubmit={sendOtp}
               >
-                <Text style={styles.back}>
-                  Back to Login
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-      </Formik>
+                {({
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  values,
+                  errors,
+                  touched,
+                }) => (
+                  <View>
+                    {/* ILLUSTRATION */}
+                    <Image
+                      source={require("../../assets/image1.png")}
+                      style={styles.image}
+                      resizeMode="contain"
+                    />
+
+                    <Text style={styles.subtitle}>
+                      Enter your registered email to receive OTP
+                    </Text>
+
+                    {/* EMAIL INPUT */}
+                    <View style={styles.inputBox}>
+                      <Ionicons name="mail-outline" size={22} color="#6b7cff" />
+                      <TextInput
+                        placeholder="Email"
+                        placeholderTextColor="#999"
+                        style={styles.input}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        editable={!loading}
+                        value={values.email}
+                        onChangeText={handleChange("email")}
+                        onBlur={handleBlur("email")}
+                      />
+                    </View>
+
+                    {touched.email && errors.email && (
+                      <Text style={styles.error}>{errors.email}</Text>
+                    )}
+
+                    {/* BUTTON */}
+                    <TouchableOpacity
+                      style={[styles.button, loading && styles.disabled]}
+                      onPress={handleSubmit}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={styles.buttonText}>Send OTP</Text>
+                      )}
+                    </TouchableOpacity>
+
+                    {/* BACK TO LOGIN */}
+                    {!loading && (
+                      <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Text style={styles.back}>Back to Login</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+              </Formik>
+            </View>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -152,25 +157,20 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingTop:100,
     padding: 24,
+    justifyContent: "center", // Centered content for cleaner look
   },
   image: {
     width: "100%",
     height: 220,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#000",
-    marginBottom: 6,
+    marginBottom: 20,
   },
   subtitle: {
     textAlign: "center",
     color: "#666",
+    fontSize: 15,
     marginBottom: 30,
+    paddingHorizontal: 10,
   },
   inputBox: {
     flexDirection: "row",
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4f6ff",
     borderRadius: 30,
     paddingHorizontal: 18,
-    paddingVertical: 14,
+    paddingVertical: Platform.OS === "ios" ? 14 : 10,
     marginBottom: 8,
   },
   input: {
@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     marginTop: 25,
     color: "#4f7cff",
     fontWeight: "bold",
+    paddingBottom: 20,
   },
   disabled: {
     opacity: 0.6,

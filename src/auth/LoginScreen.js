@@ -1,3 +1,4 @@
+import React, { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -6,9 +7,13 @@ import {
   StyleSheet,
   ActivityIndicator,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useContext, useState } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import api from "../api/axios";
@@ -41,7 +46,6 @@ export default function LoginScreen({ navigation }) {
 
     try {
       setLoading(true);
-
       const res = await api.post("/login", values);
 
       if (!res?.data?.token || !res?.data?.user) {
@@ -61,10 +65,7 @@ export default function LoginScreen({ navigation }) {
     } catch (err) {
       Toast.show({
         type: "error",
-        text1:
-          err?.response?.data?.message ||
-          err?.message ||
-          "Login failed",
+        text1: err?.response?.data?.message || err?.message || "Login failed",
       });
     } finally {
       setLoading(false);
@@ -73,111 +74,131 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Formik
-        initialValues={{ email: "", password: "" }}
-        validationSchema={LoginSchema}
-        onSubmit={submit}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-          isValid,
-        }) => (
-          <View style={styles.container}>
-
-            {/* ILLUSTRATION */}
-            <Image
-              source={require("../../assets/image.png")}
-              style={styles.image}
-              resizeMode="contain"
-            />
-
-            {/* EMAIL */}
-            <View style={styles.inputBox}>
-              <Ionicons name="mail-outline" size={22} color="#6b7cff" />
-              <TextInput
-                placeholder="Email"
-                placeholderTextColor="#999"
-                style={styles.input}
-                autoCapitalize="none"
-                editable={!loading}
-                value={values.email}
-                onChangeText={handleChange("email")}
-                onBlur={handleBlur("email")}
-              />
-            </View>
-            {touched.email && errors.email && (
-              <Text style={styles.error}>{errors.email}</Text>
-            )}
-
-            {/* PASSWORD */}
-            <View style={styles.inputBox}>
-              <Ionicons name="lock-closed-outline" size={22} color="#6b7cff" />
-              <TextInput
-                placeholder="Password"
-                placeholderTextColor="#999"
-                secureTextEntry={!showPassword}
-                style={styles.input}
-                editable={!loading}
-                value={values.password}
-                onChangeText={handleChange("password")}
-                onBlur={handleBlur("password")}
-              />
-              <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-                disabled={loading}
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+              <Formik
+                initialValues={{ email: "", password: "" }}
+                validationSchema={LoginSchema}
+                onSubmit={submit}
               >
-                <Ionicons
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={22}
-                  color="#999"
-                />
-              </TouchableOpacity>
+                {({
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  values,
+                  errors,
+                  touched,
+                  isValid,
+                }) => (
+                  <View>
+                    {/* ILLUSTRATION */}
+                    <Image
+                      source={require("../../assets/image.png")}
+                      style={styles.image}
+                      resizeMode="contain"
+                    />
+
+                    {/* EMAIL */}
+                    <View style={styles.inputBox}>
+                      <Ionicons name="mail-outline" size={22} color="#6b7cff" />
+                      <TextInput
+                        placeholder="Email"
+                        placeholderTextColor="#999"
+                        style={styles.input}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        editable={!loading}
+                        value={values.email}
+                        onChangeText={handleChange("email")}
+                        onBlur={handleBlur("email")}
+                      />
+                    </View>
+                    {touched.email && errors.email && (
+                      <Text style={styles.error}>{errors.email}</Text>
+                    )}
+
+                    {/* PASSWORD */}
+                    <View style={styles.inputBox}>
+                      <Ionicons
+                        name="lock-closed-outline"
+                        size={22}
+                        color="#6b7cff"
+                      />
+                      <TextInput
+                        placeholder="Password"
+                        placeholderTextColor="#999"
+                        secureTextEntry={!showPassword}
+                        style={styles.input}
+                        editable={!loading}
+                        value={values.password}
+                        onChangeText={handleChange("password")}
+                        onBlur={handleBlur("password")}
+                      />
+                      <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        disabled={loading}
+                      >
+                        <Ionicons
+                          name={showPassword ? "eye-off-outline" : "eye-outline"}
+                          size={22}
+                          color="#999"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {touched.password && errors.password && (
+                      <Text style={styles.error}>{errors.password}</Text>
+                    )}
+
+                    {/* FORGOT PASSWORD */}
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("ForgotPassword")}
+                    >
+                      <Text style={styles.forgot}>Forgot Password?</Text>
+                    </TouchableOpacity>
+
+                    {/* LOGIN BUTTON */}
+                    <TouchableOpacity
+                      style={[
+                        styles.button,
+                        (loading || !isValid) && styles.disabled,
+                      ]}
+                      onPress={handleSubmit}
+                      disabled={loading || !isValid}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={styles.buttonText}>Log In</Text>
+                      )}
+                    </TouchableOpacity>
+
+                    {/* REGISTER */}
+                    {!loading && (
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate("Register")}
+                      >
+                        <Text style={styles.register}>
+                          New user?{" "}
+                          <Text style={styles.registerBold}>Register</Text>
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+              </Formik>
             </View>
-            {touched.password && errors.password && (
-              <Text style={styles.error}>{errors.password}</Text>
-            )}
-
-            {/* FORGOT PASSWORD */}
-            <TouchableOpacity
-              onPress={() => navigation.navigate("ForgotPassword")}
-            >
-              <Text style={styles.forgot}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            {/* LOGIN BUTTON */}
-            <TouchableOpacity
-              style={[
-                styles.button,
-                (loading || !isValid) && styles.disabled,
-              ]}
-              onPress={handleSubmit}
-              disabled={loading || !isValid}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Log In</Text>
-              )}
-            </TouchableOpacity>
-
-            {/* REGISTER */}
-            {!loading && (
-              <TouchableOpacity
-                onPress={() => navigation.navigate("Register")}
-              >
-                <Text style={styles.register}>
-                  New user? <Text style={styles.registerBold}>Register</Text>
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-      </Formik>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -193,12 +214,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
-    paddingTop: 100,
+    justifyContent: "center", // Keeps the form centered when keyboard is off
   },
   image: {
     width: "100%",
-    height: 260,
-    marginBottom: 30,
+    height: 220, // Slightly reduced to ensure it fits better on small screens
+    marginBottom: 20,
   },
   inputBox: {
     flexDirection: "row",
@@ -206,7 +227,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4f6ff",
     borderRadius: 30,
     paddingHorizontal: 18,
-    paddingVertical: 14,
+    paddingVertical: Platform.OS === "ios" ? 16 : 10, // Adjust for OS heights
     marginBottom: 8,
   },
   input: {
@@ -243,6 +264,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 25,
     color: "#555",
+    paddingBottom: 20, // Extra space at bottom
   },
   registerBold: {
     color: "#4f7cff",

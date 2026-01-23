@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   View,
   TextInput,
@@ -6,9 +7,13 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import api from "../api/axios";
@@ -40,9 +45,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
   const [otpExpiresAt, setOtpExpiresAt] = useState(initialOtpExpiresAt);
   const [secondsLeft, setSecondsLeft] = useState(() => {
     if (!initialOtpExpiresAt) return 0;
-    const diff = Math.floor(
-      (initialOtpExpiresAt - Date.now()) / 1000
-    );
+    const diff = Math.floor((initialOtpExpiresAt - Date.now()) / 1000);
     return diff > 0 ? diff : 0;
   });
 
@@ -58,9 +61,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
     if (!otpExpiresAt) return;
 
     const tick = () => {
-      const diff = Math.floor(
-        (otpExpiresAt - Date.now()) / 1000
-      );
+      const diff = Math.floor((otpExpiresAt - Date.now()) / 1000);
       setSecondsLeft(diff > 0 ? diff : 0);
     };
 
@@ -75,7 +76,6 @@ export default function ResetPasswordScreen({ route, navigation }) {
   const resetPassword = async (values) => {
     try {
       setResetLoading(true);
-
       await api.post("/reset-password", {
         email,
         otp: values.otp,
@@ -91,9 +91,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
     } catch (err) {
       Toast.show({
         type: "error",
-        text1:
-          err?.response?.data?.message ||
-          "Invalid or expired OTP",
+        text1: err?.response?.data?.message || "Invalid or expired OTP",
       });
     } finally {
       setResetLoading(false);
@@ -106,7 +104,6 @@ export default function ResetPasswordScreen({ route, navigation }) {
   const resendOtp = async () => {
     try {
       setResendLoading(true);
-
       const res = await api.post("/forgot-password", { email });
 
       Toast.show({
@@ -114,15 +111,11 @@ export default function ResetPasswordScreen({ route, navigation }) {
         text1: "OTP resent successfully 📩",
       });
 
-      setOtpExpiresAt(
-        new Date(res.data.otpExpiresAt).getTime()
-      );
+      setOtpExpiresAt(new Date(res.data.otpExpiresAt).getTime());
     } catch (err) {
       Toast.show({
         type: "error",
-        text1:
-          err?.response?.data?.message ||
-          "Please wait before resending",
+        text1: err?.response?.data?.message || "Please wait before resending",
       });
     } finally {
       setResendLoading(false);
@@ -131,142 +124,151 @@ export default function ResetPasswordScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Formik
-        initialValues={{
-          otp: "",
-          password: "",
-          confirmPassword: "",
-        }}
-        validationSchema={ResetSchema}
-        onSubmit={resetPassword}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-        }) => (
-          <View style={styles.container}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+              <Formik
+                initialValues={{
+                  otp: "",
+                  password: "",
+                  confirmPassword: "",
+                }}
+                validationSchema={ResetSchema}
+                onSubmit={resetPassword}
+              >
+                {({
+                  handleChange,
+                  handleBlur,
+                  handleSubmit,
+                  values,
+                  errors,
+                  touched,
+                }) => (
+                  <View>
+                    {/* ILLUSTRATION */}
+                    <Image
+                      source={require("../../assets/image2.png")}
+                      style={styles.image}
+                      resizeMode="contain"
+                    />
 
-            {/* ILLUSTRATION */}
-            <Image
-              source={require("../../assets/image2.png")}
-              style={styles.image}
-              resizeMode="contain"
-            />
+                    <Text style={styles.title}>Reset Password</Text>
+                    <Text style={styles.emailText}>{email}</Text>
 
+                    {/* OTP */}
+                    <View style={styles.inputBox}>
+                      <Ionicons name="key-outline" size={22} color="#6b7cff" />
+                      <TextInput
+                        placeholder="Enter OTP"
+                        placeholderTextColor="#999"
+                        keyboardType="numeric"
+                        maxLength={6}
+                        style={styles.input}
+                        value={values.otp}
+                        onChangeText={handleChange("otp")}
+                        onBlur={handleBlur("otp")}
+                      />
+                    </View>
+                    {touched.otp && errors.otp && (
+                      <Text style={styles.error}>{errors.otp}</Text>
+                    )}
 
-            <Text style={styles.title}>{email}</Text>
+                    {/* TIMER / RESEND */}
+                    <View style={styles.timerContainer}>
+                      {secondsLeft > 0 ? (
+                        <Text style={styles.timer}>
+                          ⏳ OTP expires in {secondsLeft}s
+                        </Text>
+                      ) : (
+                        <View style={styles.expiredRow}>
+                          <Text style={styles.expired}>OTP expired </Text>
+                          <TouchableOpacity
+                            onPress={resendOtp}
+                            disabled={resendLoading}
+                          >
+                            <Text style={styles.resend}>
+                              {resendLoading ? "Resending..." : "Resend OTP"}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
 
-            {/* OTP */}
-            <View style={styles.inputBox}>
-              <Ionicons name="key-outline" size={22} color="#6b7cff" />
-              <TextInput
-                placeholder="Enter OTP"
-                placeholderTextColor="#999"
-                keyboardType="numeric"
-                maxLength={6}
-                style={styles.input}
-                value={values.otp}
-                onChangeText={handleChange("otp")}
-                onBlur={handleBlur("otp")}
-              />
+                    {/* NEW PASSWORD */}
+                    <View style={styles.inputBox}>
+                      <Ionicons name="lock-closed-outline" size={22} color="#6b7cff" />
+                      <TextInput
+                        placeholder="New Password"
+                        placeholderTextColor="#999"
+                        secureTextEntry={!showPwd}
+                        style={styles.input}
+                        value={values.password}
+                        onChangeText={handleChange("password")}
+                        onBlur={handleBlur("password")}
+                      />
+                      <TouchableOpacity onPress={() => setShowPwd(!showPwd)}>
+                        <Ionicons
+                          name={showPwd ? "eye-off-outline" : "eye-outline"}
+                          size={22}
+                          color="#999"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {touched.password && errors.password && (
+                      <Text style={styles.error}>{errors.password}</Text>
+                    )}
+
+                    {/* CONFIRM PASSWORD */}
+                    <View style={styles.inputBox}>
+                      <Ionicons name="lock-open-outline" size={22} color="#6b7cff" />
+                      <TextInput
+                        placeholder="Confirm Password"
+                        placeholderTextColor="#999"
+                        secureTextEntry={!showConfirm}
+                        style={styles.input}
+                        value={values.confirmPassword}
+                        onChangeText={handleChange("confirmPassword")}
+                        onBlur={handleBlur("confirmPassword")}
+                      />
+                      <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                        <Ionicons
+                          name={showConfirm ? "eye-off-outline" : "eye-outline"}
+                          size={22}
+                          color="#999"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {touched.confirmPassword && errors.confirmPassword && (
+                      <Text style={styles.error}>{errors.confirmPassword}</Text>
+                    )}
+
+                    {/* RESET BUTTON */}
+                    <TouchableOpacity
+                      style={[styles.button, resetLoading && styles.disabled]}
+                      onPress={handleSubmit}
+                      disabled={resetLoading}
+                    >
+                      {resetLoading ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={styles.buttonText}>Reset Password</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </Formik>
             </View>
-            {touched.otp && errors.otp && (
-              <Text style={styles.error}>{errors.otp}</Text>
-            )}
-
-            {/* TIMER / RESEND */}
-            {secondsLeft > 0 ? (
-              <Text style={styles.timer}>
-                ⏳ OTP expires in {secondsLeft}s
-              </Text>
-            ) : (
-              <>
-                <Text style={styles.expired}>
-                  OTP expired
-                </Text>
-                <TouchableOpacity
-                  onPress={resendOtp}
-                  disabled={resendLoading}
-                >
-                  <Text style={styles.resend}>
-                    {resendLoading ? "Resending..." : "Resend OTP"}
-                  </Text>
-                </TouchableOpacity>
-              </>
-            )}
-
-            {/* NEW PASSWORD */}
-            <View style={styles.inputBox}>
-              <Ionicons name="lock-closed-outline" size={22} color="#6b7cff" />
-              <TextInput
-                placeholder="New Password"
-                placeholderTextColor="#999"
-                secureTextEntry={!showPwd}
-                style={styles.input}
-                value={values.password}
-                onChangeText={handleChange("password")}
-                onBlur={handleBlur("password")}
-              />
-              <TouchableOpacity onPress={() => setShowPwd(!showPwd)}>
-                <Ionicons
-                  name={showPwd ? "eye-off-outline" : "eye-outline"}
-                  size={22}
-                  color="#999"
-                />
-              </TouchableOpacity>
-            </View>
-            {touched.password && errors.password && (
-              <Text style={styles.error}>{errors.password}</Text>
-            )}
-
-            {/* CONFIRM PASSWORD */}
-            <View style={styles.inputBox}>
-              <Ionicons name="lock-open-outline" size={22} color="#6b7cff" />
-              <TextInput
-                placeholder="Confirm Password"
-                placeholderTextColor="#999"
-                secureTextEntry={!showConfirm}
-                style={styles.input}
-                value={values.confirmPassword}
-                onChangeText={handleChange("confirmPassword")}
-                onBlur={handleBlur("confirmPassword")}
-              />
-              <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
-                <Ionicons
-                  name={showConfirm ? "eye-off-outline" : "eye-outline"}
-                  size={22}
-                  color="#999"
-                />
-              </TouchableOpacity>
-            </View>
-            {touched.confirmPassword && errors.confirmPassword && (
-              <Text style={styles.error}>{errors.confirmPassword}</Text>
-            )}
-
-            {/* RESET BUTTON */}
-            <TouchableOpacity
-              style={[
-                styles.button,
-                resetLoading && styles.disabled,
-              ]}
-              onPress={handleSubmit}
-              disabled={resetLoading}
-            >
-              {resetLoading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>
-                  Reset Password
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
-      </Formik>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -282,24 +284,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 24,
-    paddingTop: 100,
+    justifyContent: "center",
   },
   image: {
     width: "100%",
-    height: 220,
+    height: 180,
     marginBottom: 10,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     color: "#000",
-    marginBottom: 4,
   },
-  email: {
+  emailText: {
     textAlign: "center",
     color: "#777",
     marginBottom: 20,
+    fontSize: 14,
   },
   inputBox: {
     flexDirection: "row",
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4f6ff",
     borderRadius: 30,
     paddingHorizontal: 18,
-    paddingVertical: 14,
+    paddingVertical: Platform.OS === "ios" ? 14 : 10,
     marginBottom: 8,
   },
   input: {
@@ -322,26 +324,34 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginBottom: 10,
   },
+  timerContainer: {
+    height: 30,
+    justifyContent: "center",
+    marginBottom: 10,
+  },
   timer: {
     textAlign: "center",
     color: "#ff9800",
-    marginBottom: 10,
+    fontWeight: "600",
+  },
+  expiredRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   expired: {
-    textAlign: "center",
     color: "#ff5252",
   },
   resend: {
-    textAlign: "center",
     color: "#4f7cff",
     fontWeight: "bold",
-    marginBottom: 10,
   },
   button: {
     backgroundColor: "#4f7cff",
     paddingVertical: 16,
     borderRadius: 30,
-    marginTop: 10,
+    marginTop: 20,
+    marginBottom: 40,
   },
   buttonText: {
     color: "#fff",
