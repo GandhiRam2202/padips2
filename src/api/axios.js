@@ -1,13 +1,20 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { clearSession } from '../utils/storage';
+import Constants from "expo-constants";
+
+const BASE_URL = Constants.expoConfig.extra.API_BASE_URL;
+const API_KEY = Constants.expoConfig.extra.API_KEY;
+
 
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
-  timeout: 10000,
+  
+  baseURL: BASE_URL,
+  timeout: 60000,
   headers: {
-    'x-api-key': process.env.EXPO_PUBLIC_API_KEY,
+    'x-api-key': API_KEY,
   },
+  
 });
 
 api.interceptors.request.use(async (config) => {
